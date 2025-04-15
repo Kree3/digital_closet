@@ -9,7 +9,7 @@ import { separateClothingItemsMock } from './mockImageProcessingService';
 import { separateClothingItemsWithOpenAI } from './openaiVisionService';
 
 // Set this flag to switch providers: 'clarifai', 'mock', 'openai'
-const DETECTION_PROVIDER = 'openai';
+const DETECTION_PROVIDER = 'clarifai';
 
 /**
  * Main detection API for the app.
