@@ -1,7 +1,5 @@
 // VerificationScreen.js
-// Shows separated clothing articles for confirmation/discard
-// Bridge between taking and uploading a photo and adding them into your gallery. 
-// This is where the app simulates "detecting" clothing items and letting the user confirm or discard them.
+// Shows separated clothing articles for confirmation and lets user select which to add to gallery.
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { mockSeparateClothingItems } from '../services/mockImageProcessingService';
@@ -50,12 +48,12 @@ export default function VerificationScreen({ route, navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Select Items to Confirm</Text>
       <View style={styles.selectAllBar}>
+        <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
         <TouchableOpacity onPress={selectedIds.length === articles.length ? deselectAll : selectAll} style={styles.selectAllButton}>
           <Text style={styles.selectAllText}>
             {selectedIds.length === articles.length ? 'Deselect All' : 'Select All'}
           </Text>
         </TouchableOpacity>
-        <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
       </View>
       <FlatList
         data={articles}
@@ -70,11 +68,7 @@ export default function VerificationScreen({ route, navigation }) {
               activeOpacity={0.8}
             >
               <Image source={{ uri: item.imageUri }} style={styles.image} />
-              {selected && (
-                <View style={styles.selectedOverlay}>
-                  <Text style={styles.selectedCheck}>✓</Text>
-                </View>
-              )}
+
             </TouchableOpacity>
           );
         }}
@@ -96,14 +90,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginBottom: 6,
+    marginBottom: 12,
+    paddingHorizontal: 8,
   },
   selectAllButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#e6f0ff',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 18,
+    backgroundColor: '#e0e0e0',
+    marginLeft: 16,
   },
   selectAllText: {
     color: '#007AFF',
@@ -111,29 +106,34 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   selectedCount: {
-    fontSize: 15,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: 16,
+    color: '#555',
+    marginRight: 8,
   },
   confirmButton: {
     position: 'absolute',
-    bottom: 24,
-    left: 24,
-    right: 24,
-    backgroundColor: '#007AFF',
+    left: 20,
+    right: 20,
+    bottom: 48,
+    backgroundColor: '#42a5f5',
     borderRadius: 24,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#42a5f5',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.18,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#fff',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   confirmButtonDisabled: {
-    backgroundColor: '#b0c4de',
+    backgroundColor: '#bbdefb',
+    borderColor: '#f0f0f0',
   },
-
   container: {
     flex: 1,
     alignItems: 'center',
@@ -160,14 +160,11 @@ const styles = StyleSheet.create({
     width: 150,
     minHeight: 200,
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: 'transparent',
   },
-  cardSelected: {
-    borderColor: '#3b82f6', // blue highlight
-    shadowColor: '#3b82f6',
-    shadowOpacity: 0.30,
-    elevation: 8,
+  selectedCard: {
+    borderColor: '#42a5f5', // Match Finish button
   },
   image: {
     width: 120,

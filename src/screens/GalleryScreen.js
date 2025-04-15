@@ -1,7 +1,7 @@
 // GalleryScreen.js
 // Displays user's confirmed clothing articles in a grid
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function GalleryScreen({ navigation, route }) {
@@ -16,7 +16,7 @@ export default function GalleryScreen({ navigation, route }) {
         const stored = await AsyncStorage.getItem('galleryArticles');
         if (stored) setArticles(JSON.parse(stored));
       } catch (e) {
-        console.warn('Failed to load gallery articles:', e);
+        // Optionally, you can use Alert.alert here for user feedback if desired
       }
     })();
   }, []);
@@ -42,7 +42,7 @@ export default function GalleryScreen({ navigation, route }) {
           const afterSave = await AsyncStorage.getItem('galleryArticles');
           console.log('galleryArticles after save:', JSON.parse(afterSave));
         } catch (e) {
-          console.warn('Failed to merge new articles into gallery:', e);
+          // Optionally, you can use Alert.alert here for user feedback if desired
         }
       })();
     }
@@ -61,7 +61,7 @@ export default function GalleryScreen({ navigation, route }) {
       await AsyncStorage.setItem('galleryArticles', JSON.stringify(updated));
       setSelectedIds([]); // Clear selection
     } catch (e) {
-      console.warn('Failed to discard selected articles:', e);
+      // Optionally, you can use Alert.alert here for user feedback if desired
     }
   };
 
@@ -92,11 +92,6 @@ export default function GalleryScreen({ navigation, route }) {
               activeOpacity={0.8}
             >
               <Image source={{ uri: item.imageUri }} style={styles.image} />
-              {selected && (
-                <View style={styles.selectedOverlay}>
-                  <Text style={styles.selectedCheck}>✓</Text>
-                </View>
-              )}
             </TouchableOpacity>
           );
         }}
@@ -104,7 +99,7 @@ export default function GalleryScreen({ navigation, route }) {
       />
       {selectedIds.length > 0 && (
         <TouchableOpacity style={styles.discardButton} onPress={discardSelected}>
-          <Text style={styles.discardButtonText}>🗑️ Discard ({selectedIds.length})</Text>
+          <Text style={styles.discardButtonText}>Discard ({selectedIds.length})</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -134,69 +129,55 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   card: {
-    flex: 0.48, // Ensures two cards per row with spacing
-    margin: 4,
-    borderRadius: 16,
-    backgroundColor: '#f8f8f8',
+    margin: 10,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: 'hidden',
-    alignItems: 'center',
-    borderWidth: 2,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+    padding: 12,
+    width: 150,
+    minHeight: 200,
+    borderWidth: 3,
     borderColor: 'transparent',
+    justifyContent: 'center',
   },
   selectedCard: {
-    borderColor: '#007AFF',
-    borderWidth: 2,
-    backgroundColor: '#e6f0ff',
+    borderColor: '#42a5f5', // Match Finish button and VerificationScreen
   },
   image: {
-    width: 150,
-    height: 180,
+    width: 120,
+    height: 140,
     resizeMode: 'cover',
-    borderRadius: 14,
+    borderRadius: 10,
+    marginBottom: 8,
   },
-  selectedOverlay: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: 'rgba(0,122,255,0.7)',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  selectedCheck: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+
   discardButton: {
     position: 'absolute',
-    bottom: 24,
-    left: 24,
-    right: 24,
-    backgroundColor: '#ff3b30',
+    left: 20,
+    right: 20,
+    bottom: 48, // Move button up from bottom
+    backgroundColor: '#f06292', // More red, but not harsh
     borderRadius: 24,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#f06292',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.18,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#fff',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   discardButtonText: {
     color: '#fff',
-    fontSize: 18,
     fontWeight: 'bold',
-    letterSpacing: 1,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontSize: 18
   },
 });

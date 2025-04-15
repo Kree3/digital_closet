@@ -14,7 +14,7 @@ export default function HomeScreen({ navigation }) {
       return;
     }
     let result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images });
-    console.log('Camera result:', result);
+    
     let imageUri = undefined;
     if (!result.canceled && result.assets && result.assets[0]?.uri) {
       imageUri = result.assets[0].uri;
@@ -39,7 +39,7 @@ export default function HomeScreen({ navigation }) {
       return;
     }
     let result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images });
-    console.log('Image picker result:', result);
+    
     let imageUri = undefined;
     if (!result.canceled && result.assets && result.assets[0]?.uri) {
       imageUri = result.assets[0].uri;
