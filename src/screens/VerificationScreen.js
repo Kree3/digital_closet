@@ -1,8 +1,10 @@
 // VerificationScreen.js
-// Shows separated clothing articles for confirmation and lets user select which to add to gallery.
+// Displays detected clothing articles for user confirmation and selection before adding to the closet/gallery.
+// Relies on modular detection/cropping services; easy to swap Clarifai/OpenAI 4o or adjust cropping logic.
+// TODO: When switching detection providers (e.g., OpenAI 4o), update detectClothingArticles in imageProcessingService.js and adjust cropping as needed.
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { separateClothingItems } from '../services/imageProcessingService';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { detectClothingArticles } from '../services/imageProcessingService';
 
 // Toggle this flag to enable/disable bounding box overlays
 const BOUNDING_BOX_OVERLAY_ENABLED = true;
@@ -25,7 +27,7 @@ export default function VerificationScreen({ route, navigation }) {
       setLoading(true);
       setError(null);
       try {
-        const separated = await separateClothingItems(imageUri);
+        const separated = await detectClothingArticles(imageUri);
         console.log('Clothing articles returned:', separated);
         setArticles(separated);
         setSelectedIds([]); // Reset selection on new image

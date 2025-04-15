@@ -1,10 +1,13 @@
 // GalleryScreen.js
-// Displays user's confirmed clothing articles in a grid
+// Displays user's confirmed clothing articles in a grid ("My Closet").
+// Relies on modular data model and AsyncStorage for persistence.
+// TODO: If detection/image provider changes, update how images are sourced (croppedImageUri, etc.).
+// Designed for easy backend/image source swaps.
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
-// Button import removed
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GALLERY_ARTICLES_KEY } from '../services/constants';
 
 export default function GalleryScreen({ navigation, route }) {
   const [articles, setArticles] = useState([]);
@@ -15,7 +18,7 @@ export default function GalleryScreen({ navigation, route }) {
   useEffect(() => {
     (async () => {
       try {
-        const stored = await AsyncStorage.getItem('galleryArticles');
+        const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
         if (stored) setArticles(JSON.parse(stored));
       } catch (e) {
         // Optionally, you can use Alert.alert here for user feedback if desired
@@ -30,7 +33,7 @@ export default function GalleryScreen({ navigation, route }) {
       console.log('GalleryScreen received newArticles:', route.params.newArticles);
       (async () => {
         try {
-          const stored = await AsyncStorage.getItem('galleryArticles');
+          const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
           const existing = stored ? JSON.parse(stored) : [];
           console.log('Existing galleryArticles from AsyncStorage:', existing);
           // Filter out any duplicates by id
@@ -40,8 +43,8 @@ export default function GalleryScreen({ navigation, route }) {
           const combined = [...existing, ...filteredNew];
           console.log('Combined galleryArticles to be saved:', combined);
           setArticles(combined);
-          await AsyncStorage.setItem('galleryArticles', JSON.stringify(combined));
-          const afterSave = await AsyncStorage.getItem('galleryArticles');
+          await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
+          const afterSave = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
           console.log('galleryArticles after save:', JSON.parse(afterSave));
         } catch (e) {
           // Optionally, you can use Alert.alert here for user feedback if desired
@@ -52,7 +55,7 @@ export default function GalleryScreen({ navigation, route }) {
 
   // Save articles to AsyncStorage whenever they change
   useEffect(() => {
-    AsyncStorage.setItem('galleryArticles', JSON.stringify(articles));
+    AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(articles));
   }, [articles]);
 
   // Multi-select discard: delete all selected articles
@@ -60,7 +63,7 @@ export default function GalleryScreen({ navigation, route }) {
     try {
       const updated = articles.filter((a) => !selectedIds.includes(a.id));
       setArticles(updated);
-      await AsyncStorage.setItem('galleryArticles', JSON.stringify(updated));
+      await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
       setSelectedIds([]); // Clear selection
     } catch (e) {
       // Optionally, you can use Alert.alert here for user feedback if desired

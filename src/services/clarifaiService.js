@@ -1,10 +1,12 @@
+// Clarifai-specific detection provider for clothing articles.
+// Consumed by imageProcessingService.js. Swap this file for a new provider as needed.
 import { CLARIFAI_API_KEY, CLARIFAI_USER_ID, CLARIFAI_APP_ID, CLARIFAI_MODEL_ID, CLARIFAI_MODEL_VERSION_ID } from '@env';
+import { CLOTHING_CONCEPTS } from './constants';
 import * as FileSystem from 'expo-file-system';
 
 // Main Clarifai clothing detection service
 // imageUri: local or remote URI to the image
 // Returns: Array of { id, name, confidence, boundingBox } objects
-// NOTE: Clarifai requires a public URL or base64-encoded image. For local URIs, we use base64.
 export async function separateClothingItemsWithClarifai(imageUri) {
   // Clarifai expects base64 or publicly accessible URLs. For local images, you may need to upload to a temp server or use base64.
   // Here, we'll assume imageUri is a remote URL or already accessible to Clarifai.
@@ -61,15 +63,12 @@ export async function separateClothingItemsWithClarifai(imageUri) {
     // Extract clothing items from Clarifai regions (with bounding boxes)
     const regions = data.outputs[0]?.data?.regions || [];
     // Clothing-related concept names to include (expand as needed)
-    const clothingConcepts = [
-      'Jacket', 'Jeans', 'Footwear', 'Shirt', 'Pants', 'Dress', 'Skirt', 'Shorts', 'Coat', 'Sweater', 'T-shirt', 'Blouse', 'Suit', 'Hat', 'Scarf', 'Glove', 'Sock', 'Hoodie', 'Sweatshirt', 'Tank top', 'Vest', 'Cardigan', 'Boot', 'Sandal', 'Sneaker', 'Shoe', 'Tie', 'Belt', 'Cap', 'Glasses', 'Watch', 'Bag', 'Purse', 'Backpack', 'Handbag', 'Clothing', 'Fashion accessory'
-    ];
     const detectedClothing = [];
     regions.forEach((region, regionIdx) => {
       if (region.data && Array.isArray(region.data.concepts)) {
         region.data.concepts.forEach((concept, conceptIdx) => {
           // Only include relevant clothing concepts (adjust threshold as needed)
-          if (clothingConcepts.includes(concept.name) && concept.value > 0.3) {
+          if (CLOTHING_CONCEPTS.includes(concept.name) && concept.value > 0.3) {
             detectedClothing.push({
               id: `${concept.id}_${regionIdx}_${concept.name}`,
               name: concept.name,
