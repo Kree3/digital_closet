@@ -3,6 +3,7 @@
 import { CLARIFAI_API_KEY, CLARIFAI_USER_ID, CLARIFAI_APP_ID, CLARIFAI_MODEL_ID, CLARIFAI_MODEL_VERSION_ID } from '@env';
 import { CLOTHING_CONCEPTS } from './constants';
 import * as FileSystem from 'expo-file-system';
+import { mapClarifaiLabelToCategory } from './clarifaiCategoryMapper';
 
 // Main Clarifai clothing detection service
 // imageUri: local or remote URI to the image
@@ -75,6 +76,7 @@ export async function separateClothingItemsWithClarifai(imageUri) {
               confidence: concept.value,
               boundingBox: region.region_info?.bounding_box || null,
               imageUri, // Attach the original image URI for downstream use
+              category: mapClarifaiLabelToCategory(concept.name), // Standardized app category
             });
           }
         });

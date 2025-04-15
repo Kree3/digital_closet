@@ -76,7 +76,13 @@ export default function VerificationScreen({ route, navigation }) {
           return article;
         }
       }));
-      navigation.replace('Gallery', { newArticles: croppedArticles });
+      // Ensure each article has a valid category before saving
+    const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
+    const categorizedArticles = croppedArticles.map(article => ({
+      ...article,
+      category: mapClarifaiLabelToCategory(article.name)
+    }));
+    navigation.replace('Gallery', { newArticles: categorizedArticles });
     } catch (e) {
       setError('Failed to crop images.');
     } finally {

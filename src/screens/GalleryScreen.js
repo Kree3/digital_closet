@@ -4,12 +4,30 @@
 // TODO: If detection/image provider changes, update how images are sourced (croppedImageUri, etc.).
 // Designed for easy backend/image source swaps.
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GALLERY_ARTICLES_KEY } from '../services/constants';
+import CategoryCarousel from '../components/CategoryCarousel';
 
 export default function GalleryScreen({ navigation, route }) {
+  // TEMP: Debug button to clear closet
+  const handleClearCloset = async () => {
+    if (typeof window !== 'undefined' && window.confirm) {
+      if (!window.confirm('Are you sure you want to clear your entire closet? This cannot be undone.')) return;
+    } else if (!global.confirm || global.confirm('Are you sure you want to clear your entire closet? This cannot be undone.')) {
+      // fallback for React Native: always proceed
+    }
+    try {
+      await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
+      setArticles([]);
+      setSelectedIds([]);
+      console.log('Closet cleared.');
+    } catch (e) {
+      console.error('Failed to clear closet:', e);
+    }
+  };
+
   const [articles, setArticles] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]); // Track selected articles
 
@@ -77,39 +95,58 @@ export default function GalleryScreen({ navigation, route }) {
     );
   };
 
+  // DEBUG: Log loaded articles and their categories
+  console.log('GalleryScreen loaded articles:', articles);
+  if (articles.length > 0) {
+    articles.forEach((a, idx) => console.log(`Article[${idx}]: id=${a.id}, category=${a.category}`));
+  }
+
+  // Group articles by category
+  const categories = ['outerwear', 'tops', 'bottoms', 'shoes'];
+  const articlesByCategory = categories.reduce((acc, cat) => {
+    acc[cat] = articles.filter(a => a.category === cat);
+    return acc;
+  }, {});
+
+  // Placeholder for item press handler
+  const handleArticlePress = (item) => {
+    // In the future: navigate to detail, enlarge, etc.
+    // For now, just log
+    console.log('Pressed article:', item);
+  };
+
   return (
     <View style={styles.container}>
-
       <View style={styles.headerRow}>
         <Text style={styles.title}>My Closet</Text>
-        <TouchableOpacity style={styles.homeIconButton} onPress={() => navigation.navigate('Home')} accessibilityLabel="Go to Home">
+        <TouchableOpacity
+          style={styles.homeIconButton}
+          onPress={() => navigation.navigate('Home')}
+          accessibilityLabel="Go to Home"
+        >
           <Ionicons name="home" size={32} color="#42a5f5" />
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={articles}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        renderItem={({ item }) => {
-          const selected = selectedIds.includes(item.id);
-          return (
-            <TouchableOpacity
-              style={[styles.card, selected && styles.selectedCard]}
-              onPress={() => toggleSelect(item.id)}
-              activeOpacity={0.8}
-            >
-              <Image source={{ uri: item.croppedImageUri || item.imageUri }} style={styles.image} />
-            </TouchableOpacity>
-          );
-        }}
-        contentContainerStyle={styles.grid}
-      />
-      {selectedIds.length > 0 && (
-        <TouchableOpacity style={styles.discardButton} onPress={discardSelected}>
-          <Text style={styles.discardButtonText}>Discard ({selectedIds.length})</Text>
-        </TouchableOpacity>
-      )}
+      {/* TEMP: Debug clear closet button */}
+      <TouchableOpacity
+        style={{backgroundColor: '#f44336', padding: 10, margin: 16, borderRadius: 6, alignSelf: 'center'}} 
+        onPress={handleClearCloset}
+        accessibilityLabel="Clear Closet"
+      >
+        <Text style={{color: '#fff', fontWeight: 'bold'}}>Clear Closet (Debug)</Text>
+      </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {categories.map((cat) =>
+          articlesByCategory[cat] && articlesByCategory[cat].length > 0 ? (
+            <CategoryCarousel
+              key={cat}
+              category={cat}
+              articles={articlesByCategory[cat]}
+              onItemPress={handleArticlePress}
+            />
+          ) : null
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -136,64 +173,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  grid: {
-    padding: 12,
-  },
-  row: {
-    flex: 1,
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  card: {
-    margin: 10,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-    padding: 12,
-    width: 150,
-    minHeight: 200,
-    borderWidth: 3,
-    borderColor: 'transparent',
-    justifyContent: 'center',
-  },
-  selectedCard: {
-    borderColor: '#42a5f5', // Match Finish button and VerificationScreen
-  },
-  image: {
-    width: 120,
-    height: 140,
-    resizeMode: 'cover',
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-
-  discardButton: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: 48, // Move button up from bottom
-    backgroundColor: '#f06292', // More red, but not harsh
-    borderRadius: 24,
-    paddingVertical: 16,
-    alignItems: 'center',
-    shadowColor: '#f06292',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 2,
-    borderColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  discardButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18
+  scrollContent: {
+    paddingBottom: 24,
   },
 });

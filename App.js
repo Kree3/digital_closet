@@ -8,6 +8,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import VerificationScreen from './src/screens/VerificationScreen';
 import GalleryScreen from './src/screens/GalleryScreen';
 
+
 const Stack = createStackNavigator();
 
 export default function App() {
