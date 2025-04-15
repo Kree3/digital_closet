@@ -96,7 +96,7 @@ export default function GalleryScreen({ navigation, route }) {
               onPress={() => toggleSelect(item.id)}
               activeOpacity={0.8}
             >
-              <Image source={{ uri: item.imageUri }} style={styles.image} />
+              <Image source={{ uri: item.croppedImageUri || item.imageUri }} style={styles.image} />
             </TouchableOpacity>
           );
         }}

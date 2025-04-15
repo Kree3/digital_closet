@@ -2,7 +2,10 @@
 // Shows separated clothing articles for confirmation and lets user select which to add to gallery.
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { mockSeparateClothingItems } from '../services/mockImageProcessingService';
+import { separateClothingItems } from '../services/imageProcessingService';
+
+// Toggle this flag to enable/disable bounding box overlays
+const BOUNDING_BOX_OVERLAY_ENABLED = true;
 
 export default function VerificationScreen({ route, navigation }) {
   // Get the image URI passed from HomeScreen (user just took or uploaded a photo)
@@ -13,19 +16,72 @@ export default function VerificationScreen({ route, navigation }) {
   const [articles, setArticles] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]); // Track confirmed articles
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    if (imageUri) {
-      const separated = mockSeparateClothingItems(imageUri);
-      setArticles(separated);
-      setSelectedIds([]); // Reset selection on new image
+    async function processImage() {
+      if (!imageUri) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const separated = await separateClothingItems(imageUri);
+        console.log('Clothing articles returned:', separated);
+        setArticles(separated);
+        setSelectedIds([]); // Reset selection on new image
+      } catch (err) {
+        setError('Failed to process image. Please try again.');
+        setArticles([]);
+        setSelectedIds([]);
+      } finally {
+        setLoading(false);
+      }
     }
+    processImage();
   }, [imageUri]);
 
-  // Confirm-only: Only send selected articles to gallery
-  const onFinish = () => {
+  // Confirm-only: Only send selected articles to gallery, cropping each article's region
+  const onFinish = async () => {
     const confirmedArticles = articles.filter(a => selectedIds.includes(a.id));
-    navigation.replace('Gallery', { newArticles: confirmedArticles });
+    setLoading(true);
+    try {
+      // Dynamically import ImageManipulator
+      const { manipulateAsync } = await import('expo-image-manipulator');
+      // Get image size (needed to convert normalized bounding box to pixels)
+      const getImageSize = uri => new Promise((resolve, reject) => {
+        Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
+      });
+      const { width: imgW, height: imgH } = await getImageSize(imageUri);
+      const croppedArticles = await Promise.all(confirmedArticles.map(async (article) => {
+        if (!article.boundingBox) return article;
+        const { left_col, top_row, right_col, bottom_row } = article.boundingBox;
+        const crop = {
+          originX: Math.round(left_col * imgW),
+          originY: Math.round(top_row * imgH),
+          width: Math.round((right_col - left_col) * imgW),
+          height: Math.round((bottom_row - top_row) * imgH),
+        };
+        // Ensure crop dimensions are valid
+        if (crop.width <= 0 || crop.height <= 0) return article;
+        try {
+          const result = await manipulateAsync(
+            imageUri,
+            [{ crop }],
+            { compress: 1, format: 'jpeg' }
+          );
+          return { ...article, croppedImageUri: result.uri };
+        } catch (e) {
+          return article;
+        }
+      }));
+      navigation.replace('Gallery', { newArticles: croppedArticles });
+    } catch (e) {
+      setError('Failed to crop images.');
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   // Toggle selection for an article
   const toggleSelect = (id) => {
@@ -47,6 +103,8 @@ export default function VerificationScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select Items to Confirm</Text>
+      {loading && <Text style={{marginVertical: 12, color: '#42a5f5'}}>Processing image...</Text>}
+      {error && <Text style={{marginVertical: 12, color: 'red'}}>{error}</Text>}
       <View style={styles.selectAllBar}>
         <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
         <TouchableOpacity onPress={selectedIds.length === articles.length ? deselectAll : selectAll} style={styles.selectAllButton}>
@@ -67,8 +125,19 @@ export default function VerificationScreen({ route, navigation }) {
               onPress={() => toggleSelect(item.id)}
               activeOpacity={0.8}
             >
-              <Image source={{ uri: item.imageUri }} style={styles.image} />
-
+              {/* Show the original image with bounding box overlay if enabled and imageUri is available */}
+              {BOUNDING_BOX_OVERLAY_ENABLED && imageUri && item.boundingBox ? (
+                <View style={{ width: '100%', aspectRatio: 1, marginBottom: 8 }}>
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                    resizeMode="cover"
+                  />
+                  <BoundingBoxOverlay boundingBox={item.boundingBox} />
+                </View>
+              ) : null}
+              <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>{item.name}</Text>
+              <Text style={{ color: '#888', marginBottom: 4 }}>{(item.confidence * 100).toFixed(1)}%</Text>
             </TouchableOpacity>
           );
         }}
@@ -82,6 +151,31 @@ export default function VerificationScreen({ route, navigation }) {
         <Text style={styles.confirmButtonText}>Finish ({selectedIds.length})</Text>
       </TouchableOpacity>
     </View>
+  );
+}
+
+// Lightweight bounding box overlay component
+function BoundingBoxOverlay({ boundingBox }) {
+  // boundingBox values are normalized (0-1)
+  // We'll use absolute positioning within a View of relative size
+  // The parent View should have width: '100%', aspectRatio: 1
+  if (!boundingBox) return null;
+  const { top_row, left_col, bottom_row, right_col } = boundingBox;
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        left: `${left_col * 100}%`,
+        top: `${top_row * 100}%`,
+        width: `${(right_col - left_col) * 100}%`,
+        height: `${(bottom_row - top_row) * 100}%`,
+        borderWidth: 2,
+        borderColor: '#42a5f5',
+        borderRadius: 4,
+        backgroundColor: 'rgba(66, 165, 245, 0.08)',
+      }}
+    />
   );
 }
 
