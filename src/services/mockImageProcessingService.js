@@ -1,10 +1,13 @@
 // mockImageProcessingService.js
 // Mocks image processing API for development
+
+// Generate a globally unique id
+const generateUniqueId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
 export function mockSeparateClothingItems(imageUri) {
-  // For now, return 3 fake articles (all using the same image)
   return [
-    { id: '1', imageUri, confirmed: false },
-    { id: '2', imageUri, confirmed: false },
-    { id: '3', imageUri, confirmed: false },
+    { id: generateUniqueId(), imageUri, confirmed: false },
+    { id: generateUniqueId(), imageUri, confirmed: false },
+    { id: generateUniqueId(), imageUri, confirmed: false },
   ];
 }
