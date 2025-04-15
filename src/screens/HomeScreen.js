@@ -1,7 +1,8 @@
 // HomeScreen.js
 // Lets user take or upload a photo
 import React from 'react';
-import { View, Button, StyleSheet, Text, Alert } from 'react-native';
+import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function HomeScreen({ navigation }) {
@@ -57,15 +58,46 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Digital Closet</Text>
-      <Button title="Take Photo" onPress={takePhoto} />
-      <Button title="Upload Photo" onPress={pickImage} />
-      <Button title="Go to Gallery" onPress={() => navigation.navigate('Gallery')} />
+      <View style={styles.iconRow}>
+        <TouchableOpacity style={styles.iconButton} onPress={takePhoto} accessibilityLabel="Take Photo">
+          <Ionicons name="camera" size={48} color="#42a5f5" />
+          <Text style={styles.iconLabel}>Take Photo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton} onPress={pickImage} accessibilityLabel="Upload Photo">
+          <Ionicons name="image" size={48} color="#42a5f5" />
+          <Text style={styles.iconLabel}>Upload Photo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Gallery')} accessibilityLabel="Go to Gallery">
+          <Ionicons name="grid" size={48} color="#42a5f5" />
+          <Text style={styles.iconLabel}>Gallery</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32 },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  iconRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  iconButton: {
+    alignItems: 'center',
+    marginHorizontal: 18,
+  },
+  iconLabel: {
+    fontSize: 15,
+    color: '#222',
+    marginTop: 8,
+    fontWeight: '500',
+  },
 });

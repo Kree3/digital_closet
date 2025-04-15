@@ -13,10 +13,10 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Camera">
-        <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Verify" component={VerificationScreen} />
-        <Stack.Screen name="Gallery" component={GalleryScreen} />
+        <Stack.Screen name="Gallery" component={GalleryScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

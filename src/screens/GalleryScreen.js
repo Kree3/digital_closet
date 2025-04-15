@@ -1,7 +1,9 @@
 // GalleryScreen.js
 // Displays user's confirmed clothing articles in a grid
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+// Button import removed
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function GalleryScreen({ navigation, route }) {
@@ -74,9 +76,12 @@ export default function GalleryScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Button title="Back to Home" onPress={() => navigation.navigate('Home')} />
-      <View style={styles.headerWrap}>
+
+      <View style={styles.headerRow}>
         <Text style={styles.title}>My Closet</Text>
+        <TouchableOpacity style={styles.homeIconButton} onPress={() => navigation.navigate('Home')} accessibilityLabel="Go to Home">
+          <Ionicons name="home" size={32} color="#42a5f5" />
+        </TouchableOpacity>
       </View>
       <FlatList
         data={articles}
@@ -110,10 +115,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: 72, // Increased space below the status bar for a cleaner look
   },
-  headerWrap: {
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
     marginBottom: 24,
+  },
+  homeIconButton: {
+    padding: 4,
   },
   title: {
     fontSize: 22,
