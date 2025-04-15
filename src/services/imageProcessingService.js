@@ -6,10 +6,10 @@
 // All UI should call only detectClothingArticles(imageUri) for detection.
 import { separateClothingItemsWithClarifai } from './clarifaiService';
 import { separateClothingItemsMock } from './mockImageProcessingService';
+import { separateClothingItemsWithOpenAI } from './openaiVisionService';
 
-// Set this flag to switch detection providers
-// 'clarifai' | 'mock' | 'openai4o' (future)
-const DETECTION_PROVIDER = 'clarifai';
+// Set this flag to switch providers: 'clarifai', 'mock', 'openai'
+const DETECTION_PROVIDER = 'openai';
 
 /**
  * Main detection API for the app.
@@ -23,12 +23,12 @@ export async function detectClothingArticles(imageUri) {
   if (DETECTION_PROVIDER === 'clarifai') {
     console.log('[imageProcessingService] Using CLARIFAI service for imageUri:', imageUri);
     return await separateClothingItemsWithClarifai(imageUri);
+  } else if (DETECTION_PROVIDER === 'openai') {
+    console.log('[imageProcessingService] Using OPENAI service for imageUri:', imageUri);
+    return await separateClothingItemsWithOpenAI(imageUri);
   } else if (DETECTION_PROVIDER === 'mock') {
     console.log('[imageProcessingService] Using MOCK service for imageUri:', imageUri);
     return await separateClothingItemsMock(imageUri);
-  } else if (DETECTION_PROVIDER === 'openai4o') {
-    // TODO: Implement OpenAI 4o Vision API integration here
-    throw new Error('OpenAI 4o Vision provider not implemented yet.');
   } else {
     throw new Error('Unknown DETECTION_PROVIDER: ' + DETECTION_PROVIDER);
   }
