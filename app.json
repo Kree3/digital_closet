@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Digital Closet",
+    "slug": "digital-closet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
