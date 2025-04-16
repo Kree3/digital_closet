@@ -79,33 +79,27 @@ export default function CreateOutfitScreen() {
       <View style={styles.container}>
         {/* Custom header row */}
         <View style={styles.headerRow}>
-          <View style={{ flex: 1 }} />
-          {/* Centered editable name input */}
-          <TextInput
-          ref={fitNameInputRef}
-          style={styles.fitNameInput}
-          placeholder="myfitname"
-          value={name}
-          onChangeText={setName}
-          maxLength={30}
-          autoCorrect={false}
-          autoCapitalize="words"
-          placeholderTextColor="#b0bec5"
-          textAlign="center"
-          accessibilityLabel="Outfit name input"
-          onFocus={() => {
-            if (name && name.length > 0 && fitNameInputRef.current) {
-              fitNameInputRef.current.setNativeProps({ selection: { start: 0, end: name.length } });
-            }
-          }}
-        />
-          <TouchableOpacity
-            style={styles.homeIconButton}
-            onPress={() => navigation.navigate('Home')}
-            accessibilityLabel="Go to Home"
-          >
-            <Ionicons name="home" size={28} color="#1976d2" />
-          </TouchableOpacity>
+          {/* Centered editable name input with stable, modern sizing */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              ref={fitNameInputRef}
+              style={styles.fitNameInput}
+              placeholder="e.g. Summer Brunch"
+              value={name}
+              onChangeText={setName}
+              maxLength={30}
+              autoCorrect={false}
+              autoCapitalize="words"
+              placeholderTextColor="#b0bec5"
+              textAlign={name.length === 0 ? 'center' : 'left'}
+              accessibilityLabel="Outfit name input"
+              onFocus={() => {
+                if (name && name.length > 0 && fitNameInputRef.current) {
+                  fitNameInputRef.current.setNativeProps({ selection: { start: 0, end: name.length } });
+                }
+              }}
+            />
+          </View>
         </View>
         <FlatList
           data={articles}
@@ -136,7 +130,10 @@ export default function CreateOutfitScreen() {
           >
             <Text style={styles.saveButtonText}>Save Outfit</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => navigation.navigate('Gallery', { resetSelection: true })}
+          >
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -160,36 +157,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    paddingTop: 10,
-    paddingBottom: 18,
+    paddingTop: 72,
+    paddingHorizontal: 20,
+    marginBottom: 24,
     backgroundColor: '#fff',
-    marginBottom: 2,
+    maxWidth: 400,
   },
-  homeIconButton: {
-    padding: 4,
-    marginRight: 8,
-    marginLeft: 10,
-    borderRadius: 18,
-    backgroundColor: '#f7f7f7',
-    elevation: 2,
-    alignItems: 'center',
+  inputContainer: {
+    width: 260,
+    height: 44,
+    alignSelf: 'center',
+    borderWidth: 1.5,
+    borderColor: '#e3f2fd',
+    borderRadius: 12,
+    backgroundColor: '#f5faff',
     justifyContent: 'center',
   },
   fitNameInput: {
-    flex: 2,
-    fontSize: 26,
+    flex: 1,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#1976d2',
-    backgroundColor: '#f5faff',
-    borderRadius: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginHorizontal: 8,
-    borderWidth: 1.5,
-    borderColor: '#e3f2fd',
-    elevation: 1,
-    minWidth: 120,
-    maxWidth: 240,
+    paddingLeft: 18,
+    paddingRight: 10,
+    textAlign: 'left',
   },
   articleList: {
     // replaced by articleGrid
@@ -248,6 +239,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
+    marginBottom: 40, // Raised for comfortable touch per mobile UX standards
   },
   saveButton: {
     backgroundColor: '#1976d2',

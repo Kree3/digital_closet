@@ -28,7 +28,7 @@ export default function App() {
         <Stack.Screen name="Verify" component={VerificationScreen} />
         <Stack.Screen name="Gallery" component={GalleryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Outfits" component={OutfitsScreen} options={{ headerShown: true, title: 'Outfits' }} />
-        <Stack.Screen name="CreateOutfit" component={CreateOutfitScreen} options={{ headerShown: true, title: 'Create Outfit' }} />
+        <Stack.Screen name="CreateOutfit" component={CreateOutfitScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

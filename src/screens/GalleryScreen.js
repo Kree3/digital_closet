@@ -18,7 +18,20 @@ import { GALLERY_ARTICLES_KEY } from '../services/constants';
 import CategoryCarousel from '../components/CategoryCarousel';
 import { Alert } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
+
 export default function GalleryScreen({ navigation, route }) {
+  // Clear selection if requested (after canceling outfit creation)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.resetSelection) {
+        setSelectedIds([]);
+        // Optionally, clear the param so it doesn't trigger again
+        navigation.setParams({ resetSelection: undefined });
+      }
+    }, [route.params?.resetSelection])
+  );
+
   // Dev-only: Debug button to clear closet (gated by __DEV__)
   const handleClearCloset = async () => {
     if (typeof window !== 'undefined' && window.confirm) {
@@ -295,13 +308,13 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: 90, // Increased to prevent last row from being covered by select bar
   },
   fabBar: {
     position: 'absolute',
     left: 12,
     right: 12,
-    bottom: 24, // Not too close to the bottom for easy tapping
+    bottom: 40, // Raised for comfortable touch per mobile UX standards
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
