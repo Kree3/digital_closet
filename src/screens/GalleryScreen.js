@@ -46,24 +46,17 @@ export default function GalleryScreen({ navigation, route }) {
 
   // Add new articles from VerificationScreen, then persist
   useEffect(() => {
-    if (__DEV__) console.log('GalleryScreen useEffect triggered. route.params:', route.params);
     if (route.params?.newArticles) {
-      if (__DEV__) console.log('GalleryScreen received newArticles:', route.params.newArticles);
       (async () => {
         try {
           const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
           const existing = stored ? JSON.parse(stored) : [];
-          if (__DEV__) console.log('Existing galleryArticles from AsyncStorage:', existing);
           // Filter out any duplicates by id
           const existingIds = new Set(existing.map(a => a.id));
           const filteredNew = route.params.newArticles.filter(a => !existingIds.has(a.id));
-          if (__DEV__) console.log('Filtered new articles (not in existing):', filteredNew);
           const combined = [...existing, ...filteredNew];
-          if (__DEV__) console.log('Combined galleryArticles to be saved:', combined);
           setArticles(combined);
           await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
-          const afterSave = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-          if (__DEV__) console.log('galleryArticles after save:', JSON.parse(afterSave));
         } catch (e) {
           // Optionally, you can use Alert.alert here for user feedback if desired
         }
@@ -95,13 +88,7 @@ export default function GalleryScreen({ navigation, route }) {
     );
   };
 
-  // DEBUG: Log loaded articles and their categories
-  if (__DEV__) console.log('GalleryScreen loaded articles:', articles);
-  if (articles.length > 0) {
-    articles.forEach((a, idx) => {
-    if (__DEV__) console.log(`Article[${idx}]: id=${a.id}, category=${a.category}`);
-  });
-  }
+
 
   // Group articles by category
   const categories = ['outerwear', 'tops', 'bottoms', 'shoes'];
@@ -121,24 +108,25 @@ export default function GalleryScreen({ navigation, route }) {
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>My Closet</Text>
-        <TouchableOpacity
-          style={styles.homeIconButton}
-          onPress={() => navigation.navigate('Home')}
-          accessibilityLabel="Go to Home"
-        >
-          <Ionicons name="home" size={32} color="#42a5f5" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {__DEV__ && (
+            <TouchableOpacity
+              style={styles.debugIconButton}
+              onPress={handleClearCloset}
+              accessibilityLabel="Clear Closet (Debug)"
+            >
+              <Ionicons name="bug" size={32} color="#fff" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.homeIconButton}
+            onPress={() => navigation.navigate('Home')}
+            accessibilityLabel="Go to Home"
+          >
+            <Ionicons name="home" size={32} color="#42a5f5" />
+          </TouchableOpacity>
+        </View>
       </View>
-      {/* DEV ONLY: Debug button to clear closet. Visible only in development mode. */}
-      {__DEV__ && (
-        <TouchableOpacity
-          style={{backgroundColor: '#f44336', padding: 10, margin: 16, borderRadius: 6, alignSelf: 'center'}} 
-          onPress={handleClearCloset}
-          accessibilityLabel="Clear Closet"
-        >
-          <Text style={{color: '#fff', fontWeight: 'bold'}}>Clear Closet (Debug)</Text>
-        </TouchableOpacity>
-      )}
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {categories.map((cat) =>
           articlesByCategory[cat] && articlesByCategory[cat].length > 0 ? (
@@ -171,6 +159,15 @@ const styles = StyleSheet.create({
   },
   homeIconButton: {
     padding: 4,
+    marginLeft: 12,
+  },
+  debugIconButton: {
+    backgroundColor: '#f44336',
+    borderRadius: 20,
+    padding: 4,
+    marginLeft: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 22,
