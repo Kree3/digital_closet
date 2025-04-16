@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GALLERY_ARTICLES_KEY } from '../services/constants';
 import CategoryCarousel from '../components/CategoryCarousel';
+import { Alert } from 'react-native';
 
 export default function GalleryScreen({ navigation, route }) {
   // Dev-only: Debug button to clear closet (gated by __DEV__)
@@ -71,15 +72,28 @@ export default function GalleryScreen({ navigation, route }) {
 
   // Multi-select discard: delete all selected articles
   const discardSelected = async () => {
-    try {
-      const updated = articles.filter((a) => !selectedIds.includes(a.id));
-      setArticles(updated);
-      await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
-      setSelectedIds([]); // Clear selection
-    } catch (e) {
-      // Optionally, you can use Alert.alert here for user feedback if desired
-    }
+    if (selectedIds.length === 0) return;
+    Alert.alert(
+      'Delete Selected',
+      `Are you sure you want to delete ${selectedIds.length} article(s) from your closet? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            try {
+              const updated = articles.filter((a) => !selectedIds.includes(a.id));
+              setArticles(updated);
+              await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
+              setSelectedIds([]); // Clear selection
+            } catch (e) {
+              Alert.alert('Error', 'Failed to delete selected articles.');
+            }
+          }
+        }
+      ]
+    );
   };
+
 
   // Toggle selection for an article
   const toggleSelect = (id) => {
@@ -87,6 +101,16 @@ export default function GalleryScreen({ navigation, route }) {
       prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]
     );
   };
+
+  // Select all articles
+  const selectAll = () => {
+    setSelectedIds(articles.map(a => a.id));
+  };
+  // Deselect all articles
+  const deselectAll = () => {
+    setSelectedIds([]);
+  };
+
 
 
 
@@ -97,36 +121,24 @@ export default function GalleryScreen({ navigation, route }) {
     return acc;
   }, {});
 
-  // Placeholder for item press handler
+  // Handle item press: toggle selection; if none selected, revert to normal mode
   const handleArticlePress = (item) => {
-    // In the future: navigate to detail, enlarge, etc.
-    // For now, just log
-    if (__DEV__) console.log('Pressed article:', item);
+    toggleSelect(item.id);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>My Closet</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {__DEV__ && (
-            <TouchableOpacity
-              style={styles.debugIconButton}
-              onPress={handleClearCloset}
-              accessibilityLabel="Clear Closet (Debug)"
-            >
-              <Ionicons name="bug" size={32} color="#fff" />
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={styles.homeIconButton}
-            onPress={() => navigation.navigate('Home')}
-            accessibilityLabel="Go to Home"
-          >
-            <Ionicons name="home" size={32} color="#42a5f5" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.homeIconButton}
+          onPress={() => navigation.navigate('Home')}
+          accessibilityLabel="Go to Home"
+        >
+          <Ionicons name="home" size={32} color="#42a5f5" />
+        </TouchableOpacity>
       </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {categories.map((cat) =>
           articlesByCategory[cat] && articlesByCategory[cat].length > 0 ? (
@@ -135,10 +147,31 @@ export default function GalleryScreen({ navigation, route }) {
               category={cat}
               articles={articlesByCategory[cat]}
               onItemPress={handleArticlePress}
+              selectionMode={selectedIds.length > 0}
+              selectedIds={selectedIds}
             />
           ) : null
         )}
       </ScrollView>
+      {/* Floating bottom action bar for selection actions */}
+      {selectedIds.length > 0 && (
+        <View style={styles.fabBar}>
+          <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
+          <TouchableOpacity onPress={selectedIds.length === articles.length ? deselectAll : selectAll} style={styles.selectAllButton}>
+            <Text style={styles.selectAllText}>
+              {selectedIds.length === articles.length ? 'Deselect All' : 'Select All'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.deleteButton, selectedIds.length === 0 && styles.deleteButtonDisabled]}
+            onPress={discardSelected}
+            disabled={selectedIds.length === 0}
+          >
+            <Ionicons name="trash" size={20} color="#fff" />
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -174,7 +207,69 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  selectAllBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 8,
+    justifyContent: 'flex-start',
+  },
+  selectedCount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 12,
+    color: '#42a5f5',
+  },
+  selectAllButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#f7f7f7',
+    marginRight: 10,
+  },
+  selectAllText: {
+    fontSize: 14,
+    color: '#222',
+    fontWeight: '500',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f44336',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+    marginLeft: 10,
+  },
+  deleteButtonDisabled: {
+    backgroundColor: '#ddd',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginLeft: 6,
+  },
   scrollContent: {
     paddingBottom: 24,
+  },
+  fabBar: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 24, // Not too close to the bottom for easy tapping
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 100,
   },
 });

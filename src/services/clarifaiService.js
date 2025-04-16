@@ -14,18 +14,17 @@ export async function separateClothingItemsWithClarifai(imageUri) {
   const CLARIFAI_API_URL = `https://api.clarifai.com/v2/models/${CLARIFAI_MODEL_ID}/versions/${CLARIFAI_MODEL_VERSION_ID}/outputs`;
 
   try {
-    if (__DEV__) console.log('[clarifaiService] Loaded API key starts with:', CLARIFAI_API_KEY?.slice(0, 5));
+    
     // Prepare image data for Clarifai (base64 for local files, url for remote)
     let imageData = {};
     if (imageUri.startsWith('file://')) {
-      if (__DEV__) console.log('[clarifaiService] Reading local image as base64');
+      
       const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64 });
-      if (__DEV__) console.log('[clarifaiService] Base64 string length:', base64.length, 'First 30 chars:', base64.slice(0, 30));
+      
       imageData.base64 = base64;
     } else {
       imageData.url = imageUri;
     }
-    if (__DEV__) console.log('[clarifaiService] Sending image to Clarifai:', imageData.url ? imageData.url : '[base64 image]');
     const response = await fetch(CLARIFAI_API_URL, {
       method: 'POST',
       headers: {
@@ -52,14 +51,12 @@ export async function separateClothingItemsWithClarifai(imageUri) {
       let errorText = '';
       try {
         errorText = await response.text();
-        if (__DEV__) console.error('[clarifaiService] Clarifai error response:', errorText);
       } catch (e) {
         // ignore
       }
       throw new Error(`Clarifai API error: ${response.status}`);
     }
     const data = await response.json();
-    if (__DEV__) console.log('[clarifaiService] Raw Clarifai API response:', JSON.stringify(data, null, 2));
     // Extract clothing items from Clarifai regions (with bounding boxes)
     const regions = data.outputs[0]?.data?.regions || [];
     // Clothing-related concept names to include (expand as needed)
@@ -81,10 +78,10 @@ export async function separateClothingItemsWithClarifai(imageUri) {
         });
       }
     });
-    if (__DEV__) console.log('[clarifaiService] Detected clothing:', detectedClothing);
+    
     return detectedClothing;
   } catch (error) {
-    if (__DEV__) console.error('[clarifaiService] Error calling Clarifai:', error);
+    
     throw error;
   }
 }

@@ -58,19 +58,27 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.iconRow}>
-        <TouchableOpacity style={styles.iconButton} onPress={takePhoto} accessibilityLabel="Take Photo">
-          <Ionicons name="camera" size={48} color="#42a5f5" />
-          <Text style={styles.iconLabel}>Take Photo</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={pickImage} accessibilityLabel="Upload Photo">
-          <Ionicons name="image" size={48} color="#42a5f5" />
-          <Text style={styles.iconLabel}>Upload Photo</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Gallery')} accessibilityLabel="Go to Gallery">
-          <Ionicons name="grid" size={48} color="#42a5f5" />
-          <Text style={styles.iconLabel}>Gallery</Text>
-        </TouchableOpacity>
+      <View style={styles.gridContainer}>
+        <View style={styles.gridRow}>
+          <TouchableOpacity style={styles.iconButton} onPress={takePhoto} accessibilityLabel="Take Photo">
+            <Ionicons name="camera" size={48} color="#42a5f5" />
+            <Text style={styles.iconLabel}>Take Photo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={pickImage} accessibilityLabel="Upload Photo">
+            <Ionicons name="image" size={48} color="#42a5f5" />
+            <Text style={styles.iconLabel}>Upload Photo</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.gridRow}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Gallery')} accessibilityLabel="Go to Gallery">
+            <Ionicons name="grid" size={48} color="#42a5f5" />
+            <Text style={styles.iconLabel}>Gallery</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Outfits')} accessibilityLabel="Go to Outfits">
+            <Ionicons name="shirt-outline" size={48} color="#42a5f5" />
+            <Text style={styles.iconLabel}>Outfits</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -83,16 +91,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
   },
-  iconRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  gridContainer: {
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 16,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 12,
   },
   iconButton: {
     alignItems: 'center',
-    marginHorizontal: 18,
+    marginHorizontal: 24,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#f7f7f7',
+    elevation: 2,
+    minWidth: 110,
   },
   iconLabel: {
     fontSize: 15,
