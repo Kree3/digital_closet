@@ -179,7 +179,7 @@ export default function GalleryScreen({ navigation, route }) {
             style={styles.createFitButton}
             onPress={() => {
               const selectedArticles = articles.filter(a => selectedIds.includes(a.id));
-              navigation.navigate('Outfits', { selectedArticles });
+              navigation.navigate('CreateOutfit', { selectedArticles });
             }}
             accessibilityLabel="Create Fit from selected articles"
           >
