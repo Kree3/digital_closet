@@ -1,6 +1,13 @@
 // App.js
-// Entry point for Digital Closet app
-// Sets up navigation and screen flow
+//
+// Entry Point for Digital Closet App
+// ----------------------------------
+// Sets up navigation and screen flow for the app.
+// Features:
+//   - Stack navigation for Home, Verification, Gallery, Outfits, and CreateOutfit screens
+//   - Clean separation of concerns and maintainable structure
+//
+// Designed for scalability and clear navigation.
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';

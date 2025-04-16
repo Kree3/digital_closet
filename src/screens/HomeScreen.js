@@ -1,5 +1,14 @@
 // HomeScreen.js
-// Lets user take or upload a photo
+//
+// Home Screen for Digital Closet
+// ------------------------------
+// Allows users to take a photo or upload one from their gallery to start the clothing detection flow.
+// Features:
+//   - Camera and gallery integration (expo-image-picker)
+//   - Permission handling and user feedback
+//   - Clean, modern UI with clear navigation
+//
+// Designed for reliability and a seamless user experience.
 import React from 'react';
 import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

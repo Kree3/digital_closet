@@ -1,7 +1,15 @@
 // VerificationScreen.js
+//
+// Verification Screen for Digital Closet
+// -------------------------------------
 // Allows users to confirm and select detected clothing articles before adding them to the closet/gallery.
-// Modular detection/cropping services make it easy to swap Clarifai, OpenAI, or adjust cropping logic.
-// NOTE: When switching detection providers (e.g., OpenAI 4o), update detectClothingArticles in imageProcessingService.js and adjust cropping as needed.
+// Features:
+//   - Modular detection/cropping services for easy provider swaps (Clarifai, OpenAI, etc.)
+//   - Bounding box overlays and selection UI
+//   - Async image cropping and error handling
+//   - Clean, modern UI with user feedback
+//
+// Designed for flexibility and robust user experience.
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { detectClothingArticles } from '../services/imageProcessingService';
@@ -27,7 +35,7 @@ export default function VerificationScreen({ route, navigation }) {
       setError(null);
       try {
         const separated = await detectClothingArticles(imageUri);
-        if (__DEV__) console.log('Clothing articles returned:', separated);
+        
         setArticles(separated);
         setSelectedIds([]); // Reset selection on new image
       } catch (err) {

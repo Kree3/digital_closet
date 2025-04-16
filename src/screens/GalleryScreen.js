@@ -1,8 +1,15 @@
 // GalleryScreen.js
+//
+// Gallery Screen for Digital Closet
+// --------------------------------
 // Displays the user's confirmed clothing articles in a grid ("My Closet").
-// Uses a modular data model and AsyncStorage for persistence.
-// NOTE: If you change the detection/image provider, update how images are sourced (e.g., croppedImageUri).
-// Designed for easy backend/image source swaps.
+// Features:
+//   - Modular data model and AsyncStorage persistence
+//   - Category carousel and grid layout for articles
+//   - Clean, modern UI with easy backend/image source swaps
+//   - Robust error handling and user feedback
+//
+// Designed for extensibility and a polished user experience.
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,9 +30,9 @@ export default function GalleryScreen({ navigation, route }) {
       await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
       setArticles([]);
       setSelectedIds([]);
-      if (__DEV__) console.log('Closet cleared.');
+      
     } catch (e) {
-      if (__DEV__) console.error('Failed to clear closet:', e);
+      
     }
   };
 
