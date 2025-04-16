@@ -156,8 +156,23 @@ export default function GalleryScreen({ navigation, route }) {
       {/* Floating bottom action bar for selection actions */}
       {selectedIds.length > 0 && (
         <View style={styles.fabBar}>
-          {/* Left: # selected */}
-          <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
+          {/* Left: Deselect All + # selected */}
+          <TouchableOpacity
+            style={styles.deselectAllButton}
+            onPress={deselectAll}
+            accessibilityLabel="Deselect all selected articles"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="close-circle-outline" size={22} color="#888" />
+          </TouchableOpacity>
+          {/* Colored number for selected count */}
+          <Text
+            style={styles.selectedCountNumber}
+            accessibilityLabel={`${selectedIds.length} items selected`}
+            accessible={true}
+          >
+            {selectedIds.length}
+          </Text>
 
           {/* Center: + Create Fit */}
           <TouchableOpacity
@@ -226,10 +241,21 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   selectedCount: {
-    fontSize: 16,
+    // No longer used, replaced by badge
+  },
+  selectedBadge: {
+    // Removed, replaced by colored number
+  },
+  selectedBadgeText: {
+    // Removed, replaced by colored number
+  },
+  selectedCountNumber: {
+    color: '#1976d2',
     fontWeight: 'bold',
+    fontSize: 18,
     marginRight: 12,
-    color: '#42a5f5',
+    marginLeft: 2,
+    textAlign: 'center',
   },
   selectAllButton: {
     paddingHorizontal: 12,
@@ -297,5 +323,12 @@ const styles = StyleSheet.create({
     color: '#1976d2',
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  deselectAllButton: {
+    marginRight: 6,
+    padding: 2,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
