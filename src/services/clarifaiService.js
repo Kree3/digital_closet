@@ -1,5 +1,5 @@
-// Clarifai-specific detection provider for clothing articles.
-// Consumed by imageProcessingService.js. Swap this file for a new provider as needed.
+// Clarifai detection provider for clothing articles.
+// Used by imageProcessingService.js. Swap this file for a new provider as needed.
 import { CLARIFAI_API_KEY, CLARIFAI_USER_ID, CLARIFAI_APP_ID, CLARIFAI_MODEL_ID, CLARIFAI_MODEL_VERSION_ID } from '@env';
 import { CLOTHING_CONCEPTS } from './constants';
 import * as FileSystem from 'expo-file-system';
@@ -9,24 +9,23 @@ import { mapClarifaiLabelToCategory } from './clarifaiCategoryMapper';
 // imageUri: local or remote URI to the image
 // Returns: Array of { id, name, confidence, boundingBox } objects
 export async function separateClothingItemsWithClarifai(imageUri) {
-  // Clarifai expects base64 or publicly accessible URLs. For local images, you may need to upload to a temp server or use base64.
-  // Here, we'll assume imageUri is a remote URL or already accessible to Clarifai.
+  // NOTE: For local images, Clarifai requires base64 or a publicly accessible URL.
 
   const CLARIFAI_API_URL = `https://api.clarifai.com/v2/models/${CLARIFAI_MODEL_ID}/versions/${CLARIFAI_MODEL_VERSION_ID}/outputs`;
 
   try {
-    console.log('[clarifaiService] Loaded API key starts with:', CLARIFAI_API_KEY?.slice(0, 5));
+    if (__DEV__) console.log('[clarifaiService] Loaded API key starts with:', CLARIFAI_API_KEY?.slice(0, 5));
     // Prepare image data for Clarifai (base64 for local files, url for remote)
     let imageData = {};
     if (imageUri.startsWith('file://')) {
-      console.log('[clarifaiService] Reading local image as base64');
+      if (__DEV__) console.log('[clarifaiService] Reading local image as base64');
       const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64 });
-      console.log('[clarifaiService] Base64 string length:', base64.length, 'First 30 chars:', base64.slice(0, 30));
+      if (__DEV__) console.log('[clarifaiService] Base64 string length:', base64.length, 'First 30 chars:', base64.slice(0, 30));
       imageData.base64 = base64;
     } else {
       imageData.url = imageUri;
     }
-    console.log('[clarifaiService] Sending image to Clarifai:', imageData.url ? imageData.url : '[base64 image]');
+    if (__DEV__) console.log('[clarifaiService] Sending image to Clarifai:', imageData.url ? imageData.url : '[base64 image]');
     const response = await fetch(CLARIFAI_API_URL, {
       method: 'POST',
       headers: {
@@ -53,14 +52,14 @@ export async function separateClothingItemsWithClarifai(imageUri) {
       let errorText = '';
       try {
         errorText = await response.text();
-        console.error('[clarifaiService] Clarifai error response:', errorText);
+        if (__DEV__) console.error('[clarifaiService] Clarifai error response:', errorText);
       } catch (e) {
         // ignore
       }
       throw new Error(`Clarifai API error: ${response.status}`);
     }
     const data = await response.json();
-    console.log('[clarifaiService] Raw Clarifai API response:', JSON.stringify(data, null, 2));
+    if (__DEV__) console.log('[clarifaiService] Raw Clarifai API response:', JSON.stringify(data, null, 2));
     // Extract clothing items from Clarifai regions (with bounding boxes)
     const regions = data.outputs[0]?.data?.regions || [];
     // Clothing-related concept names to include (expand as needed)
@@ -82,10 +81,10 @@ export async function separateClothingItemsWithClarifai(imageUri) {
         });
       }
     });
-    console.log('[clarifaiService] Detected clothing:', detectedClothing);
+    if (__DEV__) console.log('[clarifaiService] Detected clothing:', detectedClothing);
     return detectedClothing;
   } catch (error) {
-    console.error('[clarifaiService] Error calling Clarifai:', error);
+    if (__DEV__) console.error('[clarifaiService] Error calling Clarifai:', error);
     throw error;
   }
 }

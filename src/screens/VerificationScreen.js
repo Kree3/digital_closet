@@ -1,7 +1,7 @@
 // VerificationScreen.js
-// Displays detected clothing articles for user confirmation and selection before adding to the closet/gallery.
-// Relies on modular detection/cropping services; easy to swap Clarifai/OpenAI 4o or adjust cropping logic.
-// TODO: When switching detection providers (e.g., OpenAI 4o), update detectClothingArticles in imageProcessingService.js and adjust cropping as needed.
+// Allows users to confirm and select detected clothing articles before adding them to the closet/gallery.
+// Modular detection/cropping services make it easy to swap Clarifai, OpenAI, or adjust cropping logic.
+// NOTE: When switching detection providers (e.g., OpenAI 4o), update detectClothingArticles in imageProcessingService.js and adjust cropping as needed.
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { detectClothingArticles } from '../services/imageProcessingService';
@@ -13,8 +13,7 @@ export default function VerificationScreen({ route, navigation }) {
   // Get the image URI passed from HomeScreen (user just took or uploaded a photo)
   const { imageUri } = route.params;
 
-  // Simulate clothing detection by splitting the image into 'articles'.
-  // This uses a mock function for now, but will be replaced with a real API later.
+
   const [articles, setArticles] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]); // Track confirmed articles
 
@@ -28,7 +27,7 @@ export default function VerificationScreen({ route, navigation }) {
       setError(null);
       try {
         const separated = await detectClothingArticles(imageUri);
-        console.log('Clothing articles returned:', separated);
+        if (__DEV__) console.log('Clothing articles returned:', separated);
         setArticles(separated);
         setSelectedIds([]); // Reset selection on new image
       } catch (err) {

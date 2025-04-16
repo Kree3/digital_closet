@@ -1,7 +1,6 @@
 // openaiVisionService.js
-// Provider for clothing detection using OpenAI Vision (GPT-4o or similar)
-// Uses the cheapest available model for vision (e.g., gpt-4o or gpt-4.1-mini)
-// Returns: [{ id, name, confidence, boundingBox }]
+// Provider for clothing detection using OpenAI Vision (e.g., GPT-4o).
+// Returns: [{ id, name, confidence, boundingBox }].
 
 import { OPENAI_API_KEY } from '@env';
 
@@ -17,16 +16,16 @@ export async function separateClothingItemsWithOpenAI(imageUri) {
     const response = await fetch(imageUri);
     const blob = await response.blob();
     base64Image = await blobToBase64(blob);
-    console.log('[openaiVisionService] Image converted to base64, length:', base64Image.length);
+    if (__DEV__) console.log('[openaiVisionService] Image converted to base64, length:', base64Image.length);
   } catch (e) {
-    console.error('[openaiVisionService] Failed to read image file:', e);
+    if (__DEV__) console.error('[openaiVisionService] Failed to read image file:', e);
     throw new Error('Failed to read image file for OpenAI Vision: ' + e.message);
   }
 
   // Prepare OpenAI Vision API payload
   const apiUrl = 'https://api.openai.com/v1/responses';
   const prompt = `You are the world's foremost fashion merchandiser and image retoucher with an exceptional eye for style and detail in online retail photography. Your task is as follows:\n\n1. Given the uploaded photo of an outfit, analyze and identify each individual piece of clothing (e.g., t-shirts, jackets, skirts, pants).\n2. For each article of clothing:\n   - Precisely detect its boundaries (provide cropping coordinates as {top, left, bottom, right} percentages of the image, between 0 and 1).\n   - Describe the garment’s type, color, fabric, and any other notable features.\n3. Produce a re-rendered, high-quality product image for each garment that meets the following criteria:\n   - Style: Emulate professional product images as seen on high-end online retailers like Uniqlo.\n   - Background: Replace the original background with a pure white, studio-quality backdrop.\n   - Lighting: Ensure uniform, soft, and even lighting across the entire garment.\n   - Composition: Center the clothing item without distractions or additional elements.\n   - Output: If possible, return the generated product image as a base64-encoded JPEG string. If not possible, describe how the image would look.\n\nReturn your results as a JSON array, with each item containing:\n- garment_type\n- attributes (e.g., color, fabric)\n- bounding_box (coordinates)\n- product_image (base64 string or description)`;
-  console.log('[openaiVisionService] Using prompt:', prompt);
+  if (__DEV__) console.log('[openaiVisionService] Using prompt:', prompt);
   const payload = {
     model: 'gpt-4o', // Cheapest vision model as of 2024
     input: [
@@ -56,22 +55,22 @@ export async function separateClothingItemsWithOpenAI(imageUri) {
       body: JSON.stringify(payload),
     });
   } catch (e) {
-    console.error('[openaiVisionService] Network or fetch error:', e);
+    if (__DEV__) console.error('[openaiVisionService] Network or fetch error:', e);
     throw new Error('OpenAI Vision API network error: ' + e.message);
   }
 
   if (!result.ok) {
     const errorText = await result.text();
-    console.error('[openaiVisionService] OpenAI API returned error:', errorText);
+    if (__DEV__) console.error('[openaiVisionService] OpenAI API returned error:', errorText);
     throw new Error('OpenAI Vision API error: ' + errorText);
   }
 
   let data;
   try {
     data = await result.json();
-    console.log('[openaiVisionService] OpenAI API response:', data);
+    if (__DEV__) console.log('[openaiVisionService] OpenAI API response:', data);
   } catch (e) {
-    console.error('[openaiVisionService] Failed to parse OpenAI API JSON:', e);
+    if (__DEV__) console.error('[openaiVisionService] Failed to parse OpenAI API JSON:', e);
     throw new Error('Failed to parse OpenAI Vision API response JSON: ' + e.message);
   }
 
@@ -81,7 +80,7 @@ export async function separateClothingItemsWithOpenAI(imageUri) {
     // Try to extract the actual text output from the OpenAI response
     if (data.output && Array.isArray(data.output) && data.output.length > 0) {
       const firstOutput = data.output[0];
-      console.log('[openaiVisionService] OpenAI output[0]:', firstOutput);
+      if (__DEV__) console.log('[openaiVisionService] OpenAI output[0]:', firstOutput);
       if (firstOutput.content && Array.isArray(firstOutput.content) && firstOutput.content.length > 0) {
         // Find the first content object with a text field
         const textContent = firstOutput.content.find(c => (c.type === 'output_text' || c.type === 'text') && c.text);
@@ -98,10 +97,10 @@ export async function separateClothingItemsWithOpenAI(imageUri) {
     if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```[a-zA-Z]*\n/, '').replace(/```$/, '').trim();
     }
-    console.log('[openaiVisionService] Cleaned extracted text:', cleanedText);
+    if (__DEV__) console.log('[openaiVisionService] Cleaned extracted text:', cleanedText);
     articles = JSON.parse(cleanedText);
   } catch (e) {
-    console.error('[openaiVisionService] Failed to extract/parse OpenAI output:', rawText, e);
+    if (__DEV__) console.error('[openaiVisionService] Failed to extract/parse OpenAI output:', rawText, e);
     throw new Error('Failed to parse OpenAI Vision response: ' + e.message);
   }
 
