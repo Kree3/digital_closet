@@ -156,19 +156,30 @@ export default function GalleryScreen({ navigation, route }) {
       {/* Floating bottom action bar for selection actions */}
       {selectedIds.length > 0 && (
         <View style={styles.fabBar}>
+          {/* Left: # selected */}
           <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
-          <TouchableOpacity onPress={selectedIds.length === articles.length ? deselectAll : selectAll} style={styles.selectAllButton}>
-            <Text style={styles.selectAllText}>
-              {selectedIds.length === articles.length ? 'Deselect All' : 'Select All'}
-            </Text>
+
+          {/* Center: + Create Fit */}
+          <TouchableOpacity
+            style={styles.createFitButton}
+            onPress={() => {
+              const selectedArticles = articles.filter(a => selectedIds.includes(a.id));
+              navigation.navigate('Outfits', { selectedArticles });
+            }}
+            accessibilityLabel="Create Fit from selected articles"
+          >
+            <Ionicons name="add-circle" size={24} color="#42a5f5" style={{ marginRight: 6 }} />
+            <Text style={styles.createFitText}>Create Fit</Text>
           </TouchableOpacity>
+
+          {/* Right: Trash icon only */}
           <TouchableOpacity
             style={[styles.deleteButton, selectedIds.length === 0 && styles.deleteButtonDisabled]}
             onPress={discardSelected}
             disabled={selectedIds.length === 0}
+            accessibilityLabel="Delete selected articles"
           >
-            <Ionicons name="trash" size={20} color="#fff" />
-            <Text style={styles.deleteButtonText}>Delete</Text>
+            <Ionicons name="trash" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
       )}
@@ -271,5 +282,20 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
     zIndex: 100,
+  },
+  createFitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e3f2fd',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginHorizontal: 8,
+    elevation: 2,
+  },
+  createFitText: {
+    color: '#1976d2',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });
