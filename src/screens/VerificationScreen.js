@@ -54,42 +54,17 @@ export default function VerificationScreen({ route, navigation }) {
     const confirmedArticles = articles.filter(a => selectedIds.includes(a.id));
     setLoading(true);
     try {
-      // Dynamically import ImageManipulator
-      const { manipulateAsync } = await import('expo-image-manipulator');
-      // Get image size (needed to convert normalized bounding box to pixels)
-      const getImageSize = uri => new Promise((resolve, reject) => {
-        Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
-      });
-      const { width: imgW, height: imgH } = await getImageSize(imageUri);
-      const croppedArticles = await Promise.all(confirmedArticles.map(async (article) => {
-        if (!article.boundingBox) return article;
-        const { left_col, top_row, right_col, bottom_row } = article.boundingBox;
-        const crop = {
-          originX: Math.round(left_col * imgW),
-          originY: Math.round(top_row * imgH),
-          width: Math.round((right_col - left_col) * imgW),
-          height: Math.round((bottom_row - top_row) * imgH),
-        };
-        // Ensure crop dimensions are valid
-        if (crop.width <= 0 || crop.height <= 0) return article;
-        try {
-          const result = await manipulateAsync(
-            imageUri,
-            [{ crop }],
-            { compress: 1, format: 'jpeg' }
-          );
-          return { ...article, croppedImageUri: result.uri };
-        } catch (e) {
-          return article;
-        }
-      }));
+      // Use the service to crop all confirmed articles
+      const croppedArticles = await import('../services/imageProcessingService').then(({ cropArticlesFromImage }) =>
+        cropArticlesFromImage(imageUri, confirmedArticles)
+      );
       // Ensure each article has a valid category before saving
-    const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
-    const categorizedArticles = croppedArticles.map(article => ({
-      ...article,
-      category: mapClarifaiLabelToCategory(article.name)
-    }));
-    navigation.replace('Gallery', { newArticles: categorizedArticles });
+      const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
+      const categorizedArticles = croppedArticles.map(article => ({
+        ...article,
+        category: mapClarifaiLabelToCategory(article.name)
+      }));
+      navigation.replace('Gallery', { newArticles: categorizedArticles });
     } catch (e) {
       setError('Failed to crop images.');
     } finally {

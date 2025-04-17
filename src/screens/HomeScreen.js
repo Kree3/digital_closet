@@ -4,64 +4,38 @@
 // ------------------------------
 // Allows users to take a photo or upload one from their gallery to start the clothing detection flow.
 // Features:
-//   - Camera and gallery integration (expo-image-picker)
-//   - Permission handling and user feedback
+//   - Camera and gallery integration (via mediaService)
+//   - Permission handling and user feedback (via mediaService)
 //   - Clean, modern UI with clear navigation
 //
 // Designed for reliability and a seamless user experience.
 import React from 'react';
 import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import { takePhotoWithPermission, pickImageWithPermission } from '../services/mediaService';
 
 export default function HomeScreen({ navigation }) {
-  // Handles taking a photo using expo-image-picker
+  // Handles taking a photo using the media service
   const takePhoto = async () => {
-    // Request camera permissions
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Camera permission required', 'Please allow camera access in your device settings.');
-      return;
-    }
-    let result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images });
-    
-    let imageUri = undefined;
-    if (!result.canceled && result.assets && result.assets[0]?.uri) {
-      imageUri = result.assets[0].uri;
-    } else if (!result.canceled && result.uri) {
-      imageUri = result.uri;
-    }
-    if (imageUri) {
-      navigation.navigate('Verify', { imageUri });
+    const result = await takePhotoWithPermission();
+    if (result.imageUri) {
+      navigation.navigate('Verify', { imageUri: result.imageUri });
     } else if (result.canceled) {
       Alert.alert('No photo selected', 'You cancelled taking a photo.');
-    } else {
-      Alert.alert('Error', 'No photo was returned.');
+    } else if (result.error) {
+      Alert.alert('Camera Error', result.error);
     }
   };
 
-  // Handles picking a photo from gallery
+  // Handles picking a photo from gallery using the media service
   const pickImage = async () => {
-    // Request media library permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Photo library permission required', 'Please allow photo library access in your device settings.');
-      return;
-    }
-    let result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images });
-    
-    let imageUri = undefined;
-    if (!result.canceled && result.assets && result.assets[0]?.uri) {
-      imageUri = result.assets[0].uri;
-    } else if (!result.canceled && result.uri) {
-      imageUri = result.uri;
-    }
-    if (imageUri) {
-      navigation.navigate('Verify', { imageUri });
+    const result = await pickImageWithPermission();
+    if (result.imageUri) {
+      navigation.navigate('Verify', { imageUri: result.imageUri });
     } else if (result.canceled) {
-      Alert.alert('No photo selected', 'You cancelled picking a photo.');
-    } else {
-      Alert.alert('Error', 'No photo was returned.');
+      Alert.alert('No photo selected', 'You cancelled selecting a photo.');
+    } else if (result.error) {
+      Alert.alert('Gallery Error', result.error);
     }
   };
 

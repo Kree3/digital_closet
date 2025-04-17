@@ -15,11 +15,8 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, FlatList, Image, TouchableOpacity, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import uuid from 'react-native-uuid';
-
-const OUTFITS_KEY = 'OUTFITS';
+import { saveOutfit as saveOutfitService } from '../services/outfitService';
 
 
 export default function CreateOutfitScreen() {
@@ -36,39 +33,15 @@ export default function CreateOutfitScreen() {
     setArticles((prev) => prev.filter((a) => a.id !== id));
   };
 
-  // Save the new outfit to AsyncStorage
+  // Save the new outfit using outfitService
   const saveOutfit = async () => {
-    if (articles.length === 0) {
-      Alert.alert('Select at least 1 article to create an outfit.');
-      return;
-    }
     setSaving(true);
     try {
-      const stored = await AsyncStorage.getItem(OUTFITS_KEY);
-      ('Raw stored OUTFTIS_KEY:', stored);
-      let existing = [];
-      if (stored) {
-        try {
-          existing = JSON.parse(stored);
-        } catch (parseErr) {
-          ('Failed to parse stored outfits:', parseErr);
-          existing = [];
-        }
-      }
-      ('Parsed existing outfits:', existing);
-      const newOutfit = {
-        id: uuid.v4(),
-        name: name.trim(),
-        articleIds: articles.map((a) => a.id),
-        createdAt: new Date().toISOString(),
-      };
-      ('New outfit to save:', newOutfit);
-      await AsyncStorage.setItem(OUTFITS_KEY, JSON.stringify([newOutfit, ...existing]));
+      await saveOutfitService({ name, articles });
       Alert.alert('Outfit saved!');
       navigation.navigate('Outfits');
     } catch (e) {
-      ('Failed to save outfit:', e);
-      Alert.alert('Error', 'Failed to save outfit.');
+      Alert.alert('Error', e.message || 'Failed to save outfit.');
     } finally {
       setSaving(false);
     }
