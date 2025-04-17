@@ -83,7 +83,8 @@ export default function CreateOutfitScreen() {
           columnWrapperStyle={styles.articleRow}
           renderItem={({ item }) => (
             <View style={styles.articleCard}>
-              <Image source={{ uri: item.croppedImageUri || item.imageUri }} style={styles.articleImage} />
+              {/* Support all possible image fields: croppedImageUri, imageUri, or imageUrl */}
+<Image source={{ uri: item.croppedImageUri || item.imageUri || item.imageUrl }} style={styles.articleImage} />
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => removeArticle(item.id)}

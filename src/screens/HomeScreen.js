@@ -13,13 +13,26 @@ import React from 'react';
 import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { takePhotoWithPermission, pickImageWithPermission } from '../services/mediaService';
+import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen({ navigation }) {
   // Handles taking a photo using the media service
   const takePhoto = async () => {
     const result = await takePhotoWithPermission();
-    if (result.imageUri) {
-      navigation.navigate('Verify', { imageUri: result.imageUri });
+    console.log('[HomeScreen] takePhoto result:', result);
+    if (result.assets && result.assets[0]?.base64) {
+      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.assets[0].base64}` });
+    } else if (result.base64) {
+      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.base64}` });
+    } else if (result.imageUri || result.uri) {
+      const uri = result.imageUri || result.uri;
+      try {
+        const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+        navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${base64}` });
+      } catch (e) {
+        console.error('[HomeScreen] Failed to read image as base64:', e);
+        navigation.navigate('Verify', { imageUri: uri });
+      }
     } else if (result.canceled) {
       Alert.alert('No photo selected', 'You cancelled taking a photo.');
     } else if (result.error) {
@@ -30,8 +43,20 @@ export default function HomeScreen({ navigation }) {
   // Handles picking a photo from gallery using the media service
   const pickImage = async () => {
     const result = await pickImageWithPermission();
-    if (result.imageUri) {
-      navigation.navigate('Verify', { imageUri: result.imageUri });
+    console.log('[HomeScreen] pickImage result:', result);
+    if (result.assets && result.assets[0]?.base64) {
+      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.assets[0].base64}` });
+    } else if (result.base64) {
+      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.base64}` });
+    } else if (result.imageUri || result.uri) {
+      const uri = result.imageUri || result.uri;
+      try {
+        const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+        navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${base64}` });
+      } catch (e) {
+        console.error('[HomeScreen] Failed to read image as base64:', e);
+        navigation.navigate('Verify', { imageUri: uri });
+      }
     } else if (result.canceled) {
       Alert.alert('No photo selected', 'You cancelled selecting a photo.');
     } else if (result.error) {

@@ -21,5 +21,10 @@
     "react-native": "0.73.0",
     "react-native-dotenv": "^3.4.11",
     "react-native-uuid": "^2.0.3"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^13.2.0",
+    "jest-expo": "^52.0.6",
+    "react-test-renderer": "^18.2.0"
   }
 }

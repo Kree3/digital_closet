@@ -13,14 +13,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GALLERY_ARTICLES_KEY } from '../services/constants';
+import { getAllArticles, addArticles, deleteArticlesById, clearAllArticles } from '../services/galleryService';
 import CategoryCarousel from '../components/CategoryCarousel';
 import { Alert } from 'react-native';
 
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function GalleryScreen({ navigation, route }) {
+  // Developer utility: Clear closet button
+  const handleClearCloset = async () => {
+    try {
+      await clearAllArticles();
+      setArticles([]);
+      setSelectedIds([]);
+    } catch (e) {}
+  };
+
   // Clear selection if requested (after canceling outfit creation)
   useFocusEffect(
     React.useCallback(() => {
@@ -32,65 +40,36 @@ export default function GalleryScreen({ navigation, route }) {
     }, [route.params?.resetSelection])
   );
 
-  // Dev-only: Debug button to clear closet (gated by __DEV__)
-  const handleClearCloset = async () => {
-    if (typeof window !== 'undefined' && window.confirm) {
-      if (!window.confirm('Are you sure you want to clear your entire closet? This cannot be undone.')) return;
-    } else if (!global.confirm || global.confirm('Are you sure you want to clear your entire closet? This cannot be undone.')) {
-      // fallback for React Native: always proceed
-    }
-    try {
-      await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
-      setArticles([]);
-      setSelectedIds([]);
-      
-    } catch (e) {
-      
-    }
-  };
-
   const [articles, setArticles] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]); // Track selected articles
 
 
-  // Load articles from AsyncStorage on mount
+  // Load articles from galleryService on mount
   useEffect(() => {
     (async () => {
-      try {
-        const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-        if (stored) setArticles(JSON.parse(stored));
-      } catch (e) {
-        // Optionally, you can use Alert.alert here for user feedback if desired
-      }
+      const loaded = await getAllArticles();
+      setArticles(loaded);
     })();
   }, []);
 
-  // Add new articles from VerificationScreen, then persist
+  // Add new articles from VerificationScreen, then persist via service
   useEffect(() => {
     if (route.params?.newArticles) {
       (async () => {
-        try {
-          const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-          const existing = stored ? JSON.parse(stored) : [];
-          // Filter out any duplicates by id
-          const existingIds = new Set(existing.map(a => a.id));
-          const filteredNew = route.params.newArticles.filter(a => !existingIds.has(a.id));
-          const combined = [...existing, ...filteredNew];
-          setArticles(combined);
-          await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
-        } catch (e) {
-          // Optionally, you can use Alert.alert here for user feedback if desired
-        }
+        console.log('[GalleryScreen] Received newArticles:', route.params.newArticles);
+        const combined = await addArticles(route.params.newArticles);
+        console.log('[GalleryScreen] Combined articles after add:', combined);
+        setArticles(combined);
       })();
     }
   }, [route.params]);
 
-  // Save articles to AsyncStorage whenever they change
-  useEffect(() => {
-    AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(articles));
-  }, [articles]);
+  // (No longer needed: service handles persistence)
+  // useEffect(() => {
+  //   AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(articles));
+  // }, [articles]);
 
-  // Multi-select discard: delete all selected articles
+  // Multi-select discard: delete all selected articles via service
   const discardSelected = async () => {
     if (selectedIds.length === 0) return;
     Alert.alert(
@@ -101,9 +80,8 @@ export default function GalleryScreen({ navigation, route }) {
         {
           text: 'Delete', style: 'destructive', onPress: async () => {
             try {
-              const updated = articles.filter((a) => !selectedIds.includes(a.id));
+              const updated = await deleteArticlesById(selectedIds);
               setArticles(updated);
-              await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
               setSelectedIds([]); // Clear selection
             } catch (e) {
               Alert.alert('Error', 'Failed to delete selected articles.');
@@ -113,6 +91,7 @@ export default function GalleryScreen({ navigation, route }) {
       ]
     );
   };
+
 
 
   // Toggle selection for an article
@@ -148,6 +127,10 @@ export default function GalleryScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      {/* Developer-only: Clear Closet button */}
+      <TouchableOpacity onPress={handleClearCloset} style={styles.clearButton}>
+        <Text style={styles.clearButtonText}>Clear Closet (Dev)</Text>
+      </TouchableOpacity>
       <View style={styles.headerRow}>
         <Text style={styles.title}>My Closet</Text>
         <TouchableOpacity
@@ -223,6 +206,42 @@ export default function GalleryScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  clearButton: {
+    backgroundColor: '#e74c3c',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  clearButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  placeholderContainer: {
+    backgroundColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 120,
+    width: 120,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  placeholderText: {
+    color: '#888',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#3498db',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

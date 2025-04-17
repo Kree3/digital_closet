@@ -22,7 +22,8 @@ export default function CategoryCarousel({ category, articles, onItemPress, sele
               onPress={() => onItemPress?.(item)}
               activeOpacity={0.8}
             >
-              <Image source={{ uri: item.croppedImageUri || item.imageUri }} style={styles.image} />
+              {/* Support all possible image fields: croppedImageUri, imageUri, or imageUrl */}
+              <Image source={{ uri: item.croppedImageUri || item.imageUri || item.imageUrl }} style={styles.image} />
               {selectionMode && (
                 <View style={[styles.selectionOverlay, selected && styles.selectedOverlay]}>
                   {selected && (

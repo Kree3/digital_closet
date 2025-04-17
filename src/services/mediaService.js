@@ -14,7 +14,7 @@ export async function takePhotoWithPermission() {
     if (status !== 'granted') {
       return { error: 'Camera permission required. Please allow camera access in your device settings.' };
     }
-    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images });
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images, base64: true });
     if (result.canceled) return { canceled: true };
     if (result.assets && result.assets[0]?.uri) return { imageUri: result.assets[0].uri };
     if (result.uri) return { imageUri: result.uri };
@@ -34,7 +34,7 @@ export async function pickImageWithPermission() {
     if (status !== 'granted') {
       return { error: 'Photo library permission required. Please allow photo library access in your device settings.' };
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images });
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.images, base64: true });
     if (result.canceled) return { canceled: true };
     if (result.assets && result.assets[0]?.uri) return { imageUri: result.assets[0].uri };
     if (result.uri) return { imageUri: result.uri };

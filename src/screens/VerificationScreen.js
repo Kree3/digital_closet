@@ -13,13 +13,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { detectClothingArticles } from '../services/imageProcessingService';
+import { IMAGE_PROCESSING_PROVIDER } from '../config/imageProvider';
+import { processGarmentImage } from '../services/garmentVisionService';
+
+// Optionally, import your OpenAI API key from env/config
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // Toggle this flag to enable/disable bounding box overlays
 const BOUNDING_BOX_OVERLAY_ENABLED = true;
 
 export default function VerificationScreen({ route, navigation }) {
-  // Get the image URI passed from HomeScreen (user just took or uploaded a photo)
   const { imageUri } = route.params;
+  // Truncate to avoid flooding console with large base64 data URIs
+  console.log('[VerificationScreen] imageUri param:', imageUri && typeof imageUri === 'string' && imageUri.length > 40 ? imageUri.slice(0, 30) + '...' : imageUri);
 
 
   const [articles, setArticles] = useState([]);
@@ -30,12 +36,36 @@ export default function VerificationScreen({ route, navigation }) {
 
   useEffect(() => {
     async function processImage() {
+      // Truncate to avoid flooding console with large base64 data URIs
+      console.log('[VerificationScreen] processImage, imageUri:', imageUri && typeof imageUri === 'string' && imageUri.length > 40 ? imageUri.slice(0, 30) + '...' : imageUri);
       if (!imageUri) return;
       setLoading(true);
       setError(null);
       try {
-        const separated = await detectClothingArticles(imageUri);
-        
+        let separated;
+        if (IMAGE_PROCESSING_PROVIDER === 'garmentVision') {
+          // Use Expo FileSystem to get base64 if needed (pseudo-code, adapt as needed)
+          const base64Image = imageUri.startsWith('data:')
+            ? imageUri.split(',')[1]
+            : null; // You may need to read file as base64 here
+          console.log('[VerificationScreen] GarmentVision base64Image:', base64Image ? base64Image.slice(0, 30) + '...' : null);
+          if (!base64Image) {
+            setError('Base64 image data required for GarmentVision.');
+            setArticles([]);
+            setSelectedIds([]);
+            setLoading(false);
+            return;
+          }
+          const result = await processGarmentImage(base64Image, { openaiApiKey: OPENAI_API_KEY });
+          // Assign a globally unique UUID to each article
+          const uuid = (await import('../services/uuid')).default;
+          separated = (Array.isArray(result) ? result : [result]).map(article => ({
+            ...article,
+            id: uuid(),
+          }));
+        } else {
+          separated = await detectClothingArticles(imageUri);
+        }
         setArticles(separated);
         setSelectedIds([]); // Reset selection on new image
       } catch (err) {
@@ -54,18 +84,35 @@ export default function VerificationScreen({ route, navigation }) {
     const confirmedArticles = articles.filter(a => selectedIds.includes(a.id));
     setLoading(true);
     try {
-      // Use the service to crop all confirmed articles
-      const croppedArticles = await import('../services/imageProcessingService').then(({ cropArticlesFromImage }) =>
-        cropArticlesFromImage(imageUri, confirmedArticles)
-      );
-      // Ensure each article has a valid category before saving
-      const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
-      const categorizedArticles = croppedArticles.map(article => ({
-        ...article,
-        category: mapClarifaiLabelToCategory(article.name)
-      }));
-      navigation.replace('Gallery', { newArticles: categorizedArticles });
+      let finalArticles;
+      if (IMAGE_PROCESSING_PROVIDER === 'garmentVision') {
+        // Map categories to app-standard using mapClarifaiLabelToCategory
+        const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
+        finalArticles = articles
+          .filter(a => selectedIds.includes(a.id))
+          .map(article => ({
+            ...article,
+            category: mapClarifaiLabelToCategory(article.category)
+          }));
+        if (!finalArticles.length) throw new Error('No articles selected');
+      } else {
+        const croppedArticles = await import('../services/imageProcessingService').then(({ cropArticlesFromImage }) =>
+          cropArticlesFromImage(imageUri, confirmedArticles)
+        );
+        console.log('[onFinish] Cropped articles:', croppedArticles);
+        // Ensure each article has a valid category before saving
+        const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
+        const uuid = (await import('../services/uuid')).default;
+        finalArticles = croppedArticles.map(article => ({
+          ...article,
+          id: uuid(), // assign a globally unique ID
+          category: mapClarifaiLabelToCategory(article.name)
+        }));
+      }
+      console.log('[VerificationScreen] Confirmed articles:', finalArticles);
+      navigation.replace('Gallery', { newArticles: finalArticles });
     } catch (e) {
+      console.error('[onFinish] Error:', e);
       setError('Failed to crop images.');
     } finally {
       setLoading(false);
@@ -115,19 +162,25 @@ export default function VerificationScreen({ route, navigation }) {
               onPress={() => toggleSelect(item.id)}
               activeOpacity={0.8}
             >
-              {/* Show the original image with bounding box overlay if enabled and imageUri is available */}
-              {BOUNDING_BOX_OVERLAY_ENABLED && imageUri && item.boundingBox ? (
-                <View style={{ width: '100%', aspectRatio: 1, marginBottom: 8 }}>
-                  <Image
-                    source={{ uri: imageUri }}
-                    style={{ width: '100%', height: '100%', borderRadius: 8 }}
-                    resizeMode="cover"
-                  />
-                  <BoundingBoxOverlay boundingBox={item.boundingBox} />
+              {/* Garment image or placeholder logic */}
+              {item.imageUrl ? (
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: '#f1f1f1' }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: '#f1f1f1', alignItems: 'center', justifyContent: 'center' }}>
+                  {/* Use a built-in icon or a simple SVG/emoji as a placeholder */}
+                  <Text style={{ fontSize: 36, color: '#bbb' }}>🧦</Text>
+                  <Text style={{ color: '#bbb', fontSize: 13, marginTop: 4 }}>Image not available for this item.</Text>
                 </View>
-              ) : null}
+              )}
               <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>{item.name}</Text>
-              <Text style={{ color: '#888', marginBottom: 4 }}>{(item.confidence * 100).toFixed(1)}%</Text>
+              {/* Optionally show confidence if present */}
+              {typeof item.confidence === 'number' && (
+                <Text style={{ color: '#888', marginBottom: 4 }}>{(item.confidence * 100).toFixed(1)}%</Text>
+              )}
             </TouchableOpacity>
           );
         }}
