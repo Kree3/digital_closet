@@ -29,6 +29,10 @@
   2. Screen calls a service (e.g., galleryService.js, garmentVisionService.js) to process, persist, or transform data.
   3. If using GarmentVision, the service:
       - Calls OpenAI for garment detection and mask generation
+      - ### Image Generation
+        - Uses OpenAI DALL-E **2** for generating garment images from text descriptions.
+        - Output size is set to **512x512** for optimal cost, latency, and mobile display quality.
+        - Once DALL-E 3 (or newer) supports smaller sizes or better cost/quality tradeoff, the pipeline will be upgraded accordingly.
       - Calls DALL-E edits for studio-style retouching
       - Returns bounding box, mask PNG, retouched image URL, and metadata
   4. Service returns results, which the screen displays or navigates with.

@@ -12,6 +12,7 @@
 // Designed for flexibility and robust user experience.
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { detectClothingArticles } from '../services/imageProcessingService';
 import { IMAGE_PROCESSING_PROVIDER } from '../config/imageProvider';
 import { processGarmentImage } from '../services/garmentVisionService';
@@ -44,10 +45,29 @@ export default function VerificationScreen({ route, navigation }) {
       try {
         let separated;
         if (IMAGE_PROCESSING_PROVIDER === 'garmentVision') {
-          // Use Expo FileSystem to get base64 if needed (pseudo-code, adapt as needed)
-          const base64Image = imageUri.startsWith('data:')
-            ? imageUri.split(',')[1]
-            : null; // You may need to read file as base64 here
+          // If imageUri is already base64, skip manipulation
+          let base64Image = null;
+          if (imageUri.startsWith('data:')) {
+            base64Image = imageUri.split(',')[1];
+            console.log('[VerificationScreen] Skipped manipulation, using base64 from data URI.');
+          } else {
+            let manipResult;
+            try {
+              manipResult = await ImageManipulator.manipulateAsync(
+                imageUri,
+                [{ resize: { width: 512, height: 512 } }],
+                { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+              );
+              base64Image = manipResult.base64;
+              console.log('[VerificationScreen] Manipulated image uri:', manipResult.uri);
+            } catch (manipErr) {
+              console.warn('[VerificationScreen] Image manipulation failed, falling back to original:', manipErr);
+              // Try extracting base64 from original URI if possible
+              if (imageUri.startsWith('data:')) {
+                base64Image = imageUri.split(',')[1];
+              }
+            }
+          }
           console.log('[VerificationScreen] GarmentVision base64Image:', base64Image ? base64Image.slice(0, 30) + '...' : null);
           if (!base64Image) {
             setError('Base64 image data required for GarmentVision.');

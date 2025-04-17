@@ -23,10 +23,10 @@ export async function generateGarmentImage(description, options) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'dall-e-3',
+      model: 'dall-e-2', // DALL-E 2 used for lower cost and lower resolution. Upgrade to DALL-E 3 when smaller sizes are supported.
       prompt: prompt,
       n: 1,
-      size: '1024x1024'
+      size: '512x512' // DALL-E 2 supports 256x256, 512x512, 1024x1024. Using 512x512 for mobile-friendly balance.
     })
   });
   const json = await res.json();
