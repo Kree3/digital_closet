@@ -11,6 +11,7 @@
 - **/src/services/__tests__/** – Jest regression and unit tests for all service modules.
 - **/src/services/uuid.js** – Universal, React Native–safe UUID generation.
 - **/src/services/garmentVisionService.js** – GarmentVision pipeline: OpenAI-powered garment segmentation, mask, and retouching.
+- **/src/services/imageProcessingService.js** – Central abstraction for clothing article detection. Supports only Clarifai and OpenAI (garmentVision) providers. The mock provider and abstract interface were removed for code hygiene.
 
 ## 2. Design Patterns & Principles
 
@@ -36,6 +37,11 @@
       - Calls DALL-E edits for studio-style retouching
       - Returns bounding box, mask PNG, retouched image URL, and metadata
   4. Service returns results, which the screen displays or navigates with.
+
+- **Provider Support and Code Hygiene:**
+  - As of April 2025, only Clarifai and OpenAI (garmentVision) providers are supported in `imageProcessingService.js`.
+  - The mock provider (`mockImageProcessingService.js`) and abstract interface (`IImageProcessingService.js`) were removed after confirming no active references or dependencies.
+  - This cleanup reduces code bloat and ensures a maintainable, production-focused codebase.
 
 - **No business logic in screens.**
 - **All storage, filtering, and mutation in services.**

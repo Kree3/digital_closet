@@ -70,6 +70,6 @@ export async function removeOutfit(id) {
     outfits = outfits.filter((o) => o.id !== id);
     await AsyncStorage.setItem(OUTFITS_KEY, JSON.stringify(outfits));
   } catch (e) {
-    // Fail silently for now
+    console.error('[outfitService] Failed to remove outfit:', e);
   }
 }

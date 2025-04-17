@@ -59,6 +59,9 @@ export async function separateClothingItemsWithClarifai(imageUri) {
     const data = await response.json();
     // Extract clothing items from Clarifai regions (with bounding boxes)
     const regions = data.outputs[0]?.data?.regions || [];
+    if (!Array.isArray(regions)) {
+      console.error('[clarifaiService] No regions array found in Clarifai API response:', data);
+    }
     // Clothing-related concept names to include (expand as needed)
     const detectedClothing = [];
     regions.forEach((region, regionIdx) => {

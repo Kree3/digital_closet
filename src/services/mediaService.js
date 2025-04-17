@@ -20,6 +20,7 @@ export async function takePhotoWithPermission() {
     if (result.uri) return { imageUri: result.uri };
     return { error: 'No photo was returned.' };
   } catch (e) {
+    console.error('[mediaService] Failed to take photo:', e);
     return { error: 'Failed to take photo.' };
   }
 }
@@ -40,6 +41,7 @@ export async function pickImageWithPermission() {
     if (result.uri) return { imageUri: result.uri };
     return { error: 'No photo was returned.' };
   } catch (e) {
+    console.error('[mediaService] Failed to pick photo:', e);
     return { error: 'Failed to pick photo.' };
   }
 }

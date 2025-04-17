@@ -25,8 +25,8 @@ const BOUNDING_BOX_OVERLAY_ENABLED = true;
 
 export default function VerificationScreen({ route, navigation }) {
   const { imageUri } = route.params;
-  // Truncate to avoid flooding console with large base64 data URIs
-  console.log('[VerificationScreen] imageUri param:', imageUri && typeof imageUri === 'string' && imageUri.length > 40 ? imageUri.slice(0, 30) + '...' : imageUri);
+  // Log only the type of imageUri for debugging, not the full string (avoid leaking base64 data)
+  console.log('[VerificationScreen] imageUri param type:', typeof imageUri, imageUri && imageUri.startsWith('data:') ? '[base64]' : '[file path]');
 
 
   const [articles, setArticles] = useState([]);
@@ -37,8 +37,8 @@ export default function VerificationScreen({ route, navigation }) {
 
   useEffect(() => {
     async function processImage() {
-      // Truncate to avoid flooding console with large base64 data URIs
-      console.log('[VerificationScreen] processImage, imageUri:', imageUri && typeof imageUri === 'string' && imageUri.length > 40 ? imageUri.slice(0, 30) + '...' : imageUri);
+      // Log only the type of imageUri for debugging
+      console.log('[VerificationScreen] processImage, imageUri type:', typeof imageUri, imageUri && imageUri.startsWith('data:') ? '[base64]' : '[file path]');
       if (!imageUri) return;
       setLoading(true);
       setError(null);
@@ -49,6 +49,7 @@ export default function VerificationScreen({ route, navigation }) {
           let base64Image = null;
           if (imageUri.startsWith('data:')) {
             base64Image = imageUri.split(',')[1];
+            // Skipped manipulation for base64 URI (already in correct format)
             console.log('[VerificationScreen] Skipped manipulation, using base64 from data URI.');
           } else {
             let manipResult;
@@ -59,6 +60,7 @@ export default function VerificationScreen({ route, navigation }) {
                 { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG, base64: true }
               );
               base64Image = manipResult.base64;
+              // Manipulated image successfully; log only the file path
               console.log('[VerificationScreen] Manipulated image uri:', manipResult.uri);
             } catch (manipErr) {
               console.warn('[VerificationScreen] Image manipulation failed, falling back to original:', manipErr);
@@ -68,9 +70,9 @@ export default function VerificationScreen({ route, navigation }) {
               }
             }
           }
-          console.log('[VerificationScreen] GarmentVision base64Image:', base64Image ? base64Image.slice(0, 30) + '...' : null);
+          // Do not log base64 image data for privacy/security
           if (!base64Image) {
-            setError('Base64 image data required for GarmentVision.');
+            setError('Could not extract base64 image data (required for GarmentVision pipeline).');
             setArticles([]);
             setSelectedIds([]);
             setLoading(false);
@@ -89,7 +91,7 @@ export default function VerificationScreen({ route, navigation }) {
         setArticles(separated);
         setSelectedIds([]); // Reset selection on new image
       } catch (err) {
-        setError('Failed to process image. Please try again.');
+        setError('Failed to process image (detection or conversion error). Please try again.');
         setArticles([]);
         setSelectedIds([]);
       } finally {
@@ -119,7 +121,8 @@ export default function VerificationScreen({ route, navigation }) {
         const croppedArticles = await import('../services/imageProcessingService').then(({ cropArticlesFromImage }) =>
           cropArticlesFromImage(imageUri, confirmedArticles)
         );
-        console.log('[onFinish] Cropped articles:', croppedArticles);
+        // Cropped articles ready (for debugging, can remove or wrap in debug flag)
+
         // Ensure each article has a valid category before saving
         const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
         const uuid = (await import('../services/uuid')).default;
@@ -129,11 +132,10 @@ export default function VerificationScreen({ route, navigation }) {
           category: mapClarifaiLabelToCategory(article.name)
         }));
       }
-      console.log('[VerificationScreen] Confirmed articles:', finalArticles);
       navigation.replace('Gallery', { newArticles: finalArticles });
     } catch (e) {
       console.error('[onFinish] Error:', e);
-      setError('Failed to crop images.');
+      setError('Failed to crop or process images.');
     } finally {
       setLoading(false);
     }

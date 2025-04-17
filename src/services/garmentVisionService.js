@@ -36,7 +36,7 @@ export function dataUriToBlob(dataUri) {
  * }>} Processed garment data
  */
 // Modular pipeline: 1) Get garment description (GPT-4o), 2) Generate image (DALL-E)
-// TODO: Refine prompts for both steps for best results.
+
 // Returns: { description, generatedImageUrl }
 export async function processGarmentImage(base64Image, options) {
   console.log('[garmentVisionService] processGarmentImage called with base64Image length:', base64Image?.length, 'options:', options);
@@ -83,22 +83,4 @@ export async function processGarmentImage(base64Image, options) {
     console.error('[garmentVisionService] Pipeline error:', err);
     return { error: true, message: err.message || String(err), stage: 'pipeline' };
   }
-
-  const { describeGarmentImage } = await import('./garmentDescriptionService.js');
-  const description = await describeGarmentImage(base64Image, { openaiApiKey });
-
-  // Step 2: Generate garment image from description (DALL-E)
-  // Modular service: returns a generated image URL
-  const { generateGarmentImage } = await import('./garmentImageGenerationService.js');
-  const generatedImageUrl = await generateGarmentImage(description, { openaiApiKey });
-
-  // Return both description and generated image URL
-  return {
-    description,
-    generatedImageUrl
-  };
-  // End of modular pipeline. Add new steps or swap modules here as needed.
-
 }
-
-// Add Jest tests for this service as soon as you begin integration or logic changes!

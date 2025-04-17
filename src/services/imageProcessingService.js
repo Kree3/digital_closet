@@ -3,11 +3,12 @@
 // Switch providers (Clarifai, mock, or OpenAI 4o) by changing DETECTION_PROVIDER below.
 // All UI should call only detectClothingArticles(imageUri) for detection.
 import { separateClothingItemsWithClarifai } from './clarifaiService';
-import { separateClothingItemsMock } from './mockImageProcessingService';
+
 import { separateClothingItemsWithOpenAI } from './openaiVisionService';
 import { Image } from 'react-native';
 
-// Set this flag to switch providers: 'clarifai', 'mock', 'openai'
+// Set this flag to switch providers: 'clarifai', 'mock', 'openai'.
+// To change detection provider, update DETECTION_PROVIDER below.
 const DETECTION_PROVIDER = 'clarifai';
 
 /**
@@ -25,9 +26,7 @@ export async function detectClothingArticles(imageUri) {
   } else if (DETECTION_PROVIDER === 'openai') {
     if (__DEV__) console.info('[imageProcessingService] Using OPENAI service for imageUri:', imageUri);
     return await separateClothingItemsWithOpenAI(imageUri);
-  } else if (DETECTION_PROVIDER === 'mock') {
-    if (__DEV__) console.info('[imageProcessingService] Using MOCK service for imageUri:', imageUri);
-    return await separateClothingItemsMock(imageUri);
+
   } else {
     if (__DEV__) console.error('Unknown DETECTION_PROVIDER: ' + DETECTION_PROVIDER);
     throw new Error('Unknown DETECTION_PROVIDER: ' + DETECTION_PROVIDER);

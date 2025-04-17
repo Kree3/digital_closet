@@ -26,7 +26,10 @@ export default function GalleryScreen({ navigation, route }) {
       await clearAllArticles();
       setArticles([]);
       setSelectedIds([]);
-    } catch (e) {}
+    } catch (e) {
+      console.error('[GalleryScreen] Error clearing closet:', e);
+      Alert.alert('Error', 'Failed to clear closet.');
+    }
   };
 
   // Clear selection if requested (after canceling outfit creation)
@@ -56,18 +59,14 @@ export default function GalleryScreen({ navigation, route }) {
   useEffect(() => {
     if (route.params?.newArticles) {
       (async () => {
-        console.log('[GalleryScreen] Received newArticles:', route.params.newArticles);
+        // Received new articles from VerificationScreen
         const combined = await addArticles(route.params.newArticles);
-        console.log('[GalleryScreen] Combined articles after add:', combined);
         setArticles(combined);
       })();
     }
   }, [route.params]);
 
-  // (No longer needed: service handles persistence)
-  // useEffect(() => {
-  //   AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(articles));
-  // }, [articles]);
+
 
   // Multi-select discard: delete all selected articles via service
   const discardSelected = async () => {
@@ -114,6 +113,7 @@ export default function GalleryScreen({ navigation, route }) {
 
 
   // Group articles by category
+  // Categories are hardcoded for now; update if your data model changes
   const categories = ['outerwear', 'tops', 'bottoms', 'shoes'];
   const articlesByCategory = categories.reduce((acc, cat) => {
     acc[cat] = articles.filter(a => a.category === cat);

@@ -46,13 +46,15 @@ export async function describeGarmentImage(base64Image, options) {
     })
   });
   const json = await res.json();
-  console.log('[garmentDescriptionService] Full OpenAI API response:', JSON.stringify(json));
+  // For debugging only; remove or wrap in debug flag for production
+  // console.log('[garmentDescriptionService] Full OpenAI API response:', JSON.stringify(json));
   if (!json.choices || !json.choices[0] || !json.choices[0].message || typeof json.choices[0].message.content !== 'string') {
     console.error('[garmentDescriptionService] Unexpected API response structure:', json);
     return [];
   }
   let contentStr = json.choices[0].message.content.trim();
-  console.log('[garmentDescriptionService] Raw model content:', contentStr);
+  // For debugging only; remove or wrap in debug flag for production
+  // console.log('[garmentDescriptionService] Raw model content:', contentStr);
   // Strip Markdown code fences if present
   if (contentStr.startsWith('```')) {
     // Remove the opening and closing code fences

@@ -24,13 +24,11 @@ export default function CategoryCarousel({ category, articles, onItemPress, sele
             >
               {/* Support all possible image fields: croppedImageUri, imageUri, or imageUrl */}
               <Image source={{ uri: item.croppedImageUri || item.imageUri || item.imageUrl }} style={styles.image} />
-              {selectionMode && (
-                <View style={[styles.selectionOverlay, selected && styles.selectedOverlay]}>
-                  {selected && (
-                    <View style={styles.checkmarkCircle}>
-                      <Ionicons name="checkmark" size={20} color="#fff" />
-                    </View>
-                  )}
+              {selected && (
+                <View style={[styles.selectionOverlay, styles.selectedOverlay]}>
+                  <View style={styles.checkmarkCircle}>
+                    <Ionicons name="checkmark" size={20} color="#fff" />
+                  </View>
                 </View>
               )}
             </TouchableOpacity>

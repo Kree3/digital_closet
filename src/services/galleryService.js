@@ -13,7 +13,7 @@ export async function getAllArticles() {
   // Debug: Log raw AsyncStorage value
   try {
     const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-    console.log('[galleryService] getAllArticles raw:', stored);
+
     return stored ? JSON.parse(stored) : [];
   } catch (e) {
     console.error('[galleryService] getAllArticles error:', e);
@@ -29,17 +29,13 @@ export async function getAllArticles() {
 export async function addArticles(newArticles) {
   try {
     const existing = await getAllArticles();
-    console.log('[galleryService] Existing articles:', existing);
     const existingIds = new Set(existing.map(a => a.id));
     const filteredNew = newArticles.filter(a => !existingIds.has(a.id));
-    console.log('[galleryService] Filtered new articles:', filteredNew);
     const combined = [...existing, ...filteredNew];
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
-    // Debug: Log written value
-    const verify = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-    console.log('[galleryService] addArticles wrote:', verify);
     return combined;
   } catch (e) {
+    console.error('[galleryService] addArticles error:', e);
     return [];
   }
 }
@@ -56,6 +52,7 @@ export async function deleteArticlesById(idsToDelete) {
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
     return updated;
   } catch (e) {
+    console.error('[galleryService] deleteArticlesById error:', e);
     return [];
   }
 }
@@ -66,7 +63,7 @@ export async function deleteArticlesById(idsToDelete) {
  */
 export async function clearAllArticles() {
   await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
-  // Debug: Log value after clear
-  const verify = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-  console.log('[galleryService] clearAllArticles, value after clear:', verify);
+  // Optionally verify removal in debug mode
+  // const verify = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
+  // console.log('[galleryService] clearAllArticles, value after clear:', verify);
 }
