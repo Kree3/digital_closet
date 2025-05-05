@@ -22,15 +22,31 @@ export async function getAllArticles() {
 }
 
 /**
- * Add new articles (array) to the closet, filtering by unique id.
+ * Add new articles (array) to the closet, filtering by unique id and validating image fields.
  * @param {Array} newArticles
+ * @param {Object} options
+ * @param {boolean} [options.validateImageFields=true] - If true, only save articles with at least one image field
  * @returns {Promise<Array>} Combined array of all articles
  */
-export async function addArticles(newArticles) {
+export async function addArticles(newArticles, options = { validateImageFields: true }) {
   try {
     const existing = await getAllArticles();
     const existingIds = new Set(existing.map(a => a.id));
-    const filteredNew = newArticles.filter(a => !existingIds.has(a.id));
+    
+    // Filter out articles with duplicate IDs
+    let filteredNew = newArticles.filter(a => !existingIds.has(a.id));
+    
+    // Validate image fields if option is enabled
+    if (options.validateImageFields) {
+      filteredNew = filteredNew.filter(article => {
+        const hasImageField = article.croppedImageUri || article.imageUri || article.imageUrl;
+        if (!hasImageField) {
+          console.warn(`[galleryService] Skipping article with ID ${article.id} due to missing image fields`);
+        }
+        return hasImageField;
+      });
+    }
+    
     const combined = [...existing, ...filteredNew];
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
     return combined;

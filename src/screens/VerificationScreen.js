@@ -4,18 +4,15 @@
 // -------------------------------------
 // Allows users to confirm and select detected clothing articles before adding them to the closet/gallery.
 // Features:
-//   - Modular detection/cropping services for easy provider swaps (Clarifai, OpenAI, etc.)
+//   - Clean Architecture: UI only, all business logic in verificationService
 //   - Bounding box overlays and selection UI
-//   - Async image cropping and error handling
+//   - Robust error handling and loading states
 //   - Clean, modern UI with user feedback
 //
 // Designed for flexibility and robust user experience.
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import * as ImageManipulator from 'expo-image-manipulator';
-import { detectClothingArticles } from '../services/imageProcessingService';
-import { IMAGE_PROCESSING_PROVIDER } from '../config/imageProvider';
-import { processGarmentImage } from '../services/garmentVisionService';
+import { processImageForVerification, processSelectedArticles } from '../services/verificationService';
 
 // Optionally, import your OpenAI API key from env/config
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -27,6 +24,8 @@ export default function VerificationScreen({ route, navigation }) {
   const { imageUri } = route.params;
   // Log only the type of imageUri for debugging, not the full string (avoid leaking base64 data)
   console.log('[VerificationScreen] imageUri param type:', typeof imageUri, imageUri && imageUri.startsWith('data:') ? '[base64]' : '[file path]');
+  
+  // Screen state - following Clean Architecture, this component only manages UI state
 
 
   const [articles, setArticles] = useState([]);
@@ -40,105 +39,48 @@ export default function VerificationScreen({ route, navigation }) {
       // Log only the type of imageUri for debugging
       console.log('[VerificationScreen] processImage, imageUri type:', typeof imageUri, imageUri && imageUri.startsWith('data:') ? '[base64]' : '[file path]');
       if (!imageUri) return;
+      
       setLoading(true);
       setError(null);
-      try {
-        let separated;
-        if (IMAGE_PROCESSING_PROVIDER === 'garmentVision') {
-          // If imageUri is already base64, skip manipulation
-          let base64Image = null;
-          if (imageUri.startsWith('data:')) {
-            base64Image = imageUri.split(',')[1];
-            // Skipped manipulation for base64 URI (already in correct format)
-            console.log('[VerificationScreen] Skipped manipulation, using base64 from data URI.');
-          } else {
-            let manipResult;
-            try {
-              manipResult = await ImageManipulator.manipulateAsync(
-                imageUri,
-                [{ resize: { width: 512, height: 512 } }],
-                { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG, base64: true }
-              );
-              base64Image = manipResult.base64;
-              // Manipulated image successfully; log only the file path
-              console.log('[VerificationScreen] Manipulated image uri:', manipResult.uri);
-            } catch (manipErr) {
-              console.warn('[VerificationScreen] Image manipulation failed, falling back to original:', manipErr);
-              // Try extracting base64 from original URI if possible
-              if (imageUri.startsWith('data:')) {
-                base64Image = imageUri.split(',')[1];
-              }
-            }
-          }
-          // Do not log base64 image data for privacy/security
-          if (!base64Image) {
-            setError('Could not extract base64 image data (required for GarmentVision pipeline).');
-            setArticles([]);
-            setSelectedIds([]);
-            setLoading(false);
-            return;
-          }
-          const result = await processGarmentImage(base64Image, { openaiApiKey: OPENAI_API_KEY });
-          // Assign a globally unique UUID to each article
-          const uuid = (await import('../services/uuid')).default;
-          separated = (Array.isArray(result) ? result : [result]).map(article => ({
-            ...article,
-            id: uuid(),
-          }));
-        } else {
-          separated = await detectClothingArticles(imageUri);
-        }
-        setArticles(separated);
-        setSelectedIds([]); // Reset selection on new image
-      } catch (err) {
-        setError('Failed to process image (detection or conversion error). Please try again.');
+      
+      // Use the verificationService to process the image
+      const { articles, error } = await processImageForVerification(imageUri, { 
+        openaiApiKey: OPENAI_API_KEY 
+      });
+      
+      if (error) {
+        setError(error);
         setArticles([]);
         setSelectedIds([]);
-      } finally {
-        setLoading(false);
+      } else {
+        setArticles(articles);
+        setSelectedIds([]); // Reset selection on new image
       }
+      
+      setLoading(false);
     }
+    
     processImage();
   }, [imageUri]);
 
-  // Confirm-only: Only send selected articles to gallery, cropping each article's region
+  // Confirm-only: Only send selected articles to gallery, processing each article as needed
   const onFinish = async () => {
-    const confirmedArticles = articles.filter(a => selectedIds.includes(a.id));
     setLoading(true);
-    try {
-      let finalArticles;
-      if (IMAGE_PROCESSING_PROVIDER === 'garmentVision') {
-        // Map categories to app-standard using mapClarifaiLabelToCategory
-        const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
-        finalArticles = articles
-          .filter(a => selectedIds.includes(a.id))
-          .map(article => ({
-            ...article,
-            category: mapClarifaiLabelToCategory(article.category)
-          }));
-        if (!finalArticles.length) throw new Error('No articles selected');
-      } else {
-        const croppedArticles = await import('../services/imageProcessingService').then(({ cropArticlesFromImage }) =>
-          cropArticlesFromImage(imageUri, confirmedArticles)
-        );
-        // Cropped articles ready (for debugging, can remove or wrap in debug flag)
-
-        // Ensure each article has a valid category before saving
-        const { mapClarifaiLabelToCategory } = await import('../services/clarifaiCategoryMapper');
-        const uuid = (await import('../services/uuid')).default;
-        finalArticles = croppedArticles.map(article => ({
-          ...article,
-          id: uuid(), // assign a globally unique ID
-          category: mapClarifaiLabelToCategory(article.name)
-        }));
-      }
-      navigation.replace('Gallery', { newArticles: finalArticles });
-    } catch (e) {
-      console.error('[onFinish] Error:', e);
-      setError('Failed to crop or process images.');
-    } finally {
+    setError(null);
+    
+    // Use the verificationService to process selected articles
+    const { finalArticles, error } = await processSelectedArticles(imageUri, articles, selectedIds);
+    
+    if (error) {
+      console.error('[VerificationScreen] onFinish error:', error);
+      setError(error);
       setLoading(false);
+      return;
     }
+    
+    // Navigate to Gallery with the processed articles
+    navigation.replace('Gallery', { newArticles: finalArticles });
+    setLoading(false);
   };
 
 

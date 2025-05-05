@@ -17,6 +17,11 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 describe('galleryService', () => {
+  it('should return an empty array if storage contains malformed JSON', async () => {
+    AsyncStorage.getItem.mockResolvedValueOnce('not-json');
+    const result = await getAllArticles();
+    expect(result).toEqual([]);
+  });
   beforeEach(() => {
     jest.clearAllMocks();
   });
