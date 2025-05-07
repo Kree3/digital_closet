@@ -7,6 +7,8 @@ console.log('[garmentVisionService] TOP OF FILE loaded');
 //
 // NOTE: You must provide your OpenAI API key via environment/config.
 
+import { downloadAndSaveImage } from './imageStorageService';
+
 /**
  * Utility: Convert a base64 data URI to a Blob (for multipart/form-data)
  * @param {string} dataUri - e.g. 'data:image/png;base64,iVBORw0...'
@@ -69,6 +71,16 @@ export async function processGarmentImage(base64Image, options) {
         const generatedImageUrl = await generateGarmentImage(article.description, { openaiApiKey });
         article.imageUrl = generatedImageUrl;
         console.log(`[garmentVisionService] DALL-E image URL for item ${article.id}:`, generatedImageUrl);
+        
+        // Download and save the image locally for persistence
+        try {
+          const localImageUri = await downloadAndSaveImage(generatedImageUrl);
+          article.localImageUri = localImageUri;
+          console.log(`[garmentVisionService] Saved local image for item ${article.id}:`, localImageUri);
+        } catch (downloadError) {
+          console.error(`[garmentVisionService] Error saving local image for item ${article.id}:`, downloadError);
+          // We still have the imageUrl, so we can continue even if local storage fails
+        }
       } catch (e) {
         // If DALL-E fails, set imageUrl to null and add error property
         article.imageUrl = null;

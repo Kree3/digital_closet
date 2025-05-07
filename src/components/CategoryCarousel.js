@@ -1,11 +1,27 @@
 // CategoryCarousel.js
 // Renders a horizontal carousel of clothing articles for a given category (Netflix-style)
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { validateImageUrl } from '../services/urlValidationService';
 
 export default function CategoryCarousel({ category, articles, onItemPress, selectionMode = false, selectedIds = [] }) {
+  // Function to check if an article's image URL is expired
+  const checkImageUrlStatus = (item) => {
+    // Prioritize local image URI for persistence
+    const imageUrl = item.localImageUri || item.croppedImageUri || item.imageUri || item.imageUrl;
+    if (!imageUrl) return { valid: false, message: 'No image available' };
+    
+    // Only validate remote URLs (those that start with http or https)
+    if (imageUrl.startsWith('http')) {
+      return validateImageUrl(imageUrl);
+    }
+    
+    // Local images are always valid
+    return { valid: true, expired: false, message: 'Local image' };
+  };
+  
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
@@ -16,14 +32,33 @@ export default function CategoryCarousel({ category, articles, onItemPress, sele
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => {
           const selected = selectionMode && selectedIds.includes(item.id);
+          const imageStatus = checkImageUrlStatus(item);
+          const imageUrl = item.localImageUri || item.croppedImageUri || item.imageUri || item.imageUrl;
+          
           return (
             <TouchableOpacity
               style={[styles.card, selected && styles.selectedCard]}
               onPress={() => onItemPress?.(item)}
               activeOpacity={0.8}
             >
-              {/* Support all possible image fields: croppedImageUri, imageUri, or imageUrl */}
-              <Image source={{ uri: item.croppedImageUri || item.imageUri || item.imageUrl }} style={styles.image} />
+              {imageStatus.valid ? (
+                <Image source={{ uri: imageUrl }} style={styles.image} />
+              ) : (
+                <View style={styles.expiredImageContainer}>
+                  {imageStatus.expired ? (
+                    <>
+                      <Ionicons name="refresh-circle" size={32} color="#42a5f5" />
+                      <Text style={styles.expiredText}>Refresh Needed</Text>
+                    </>
+                  ) : (
+                    <>
+                      <Ionicons name="image-outline" size={32} color="#888" />
+                      <Text style={styles.expiredText}>No Image</Text>
+                    </>
+                  )}
+                </View>
+              )}
+              
               {selected && (
                 <View style={[styles.selectionOverlay, styles.selectedOverlay]}>
                   <View style={styles.checkmarkCircle}>
@@ -106,5 +141,22 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 10,
     resizeMode: 'cover',
+  },
+  // Styles for expired image container
+  expiredImageContainer: {
+    width: 110,
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  expiredText: {
+    marginTop: 8,
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#555',
+    fontWeight: '500',
   },
 });

@@ -126,10 +126,10 @@ export default function VerificationScreen({ route, navigation }) {
               onPress={() => toggleSelect(item.id)}
               activeOpacity={0.8}
             >
-              {/* Garment image or placeholder logic */}
-              {item.imageUrl ? (
+              {/* Garment image or placeholder logic - prioritize local images for persistence */}
+              {item.localImageUri || item.imageUrl ? (
                 <Image
-                  source={{ uri: item.imageUrl }}
+                  source={{ uri: item.localImageUri || item.imageUrl }}
                   style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: '#f1f1f1' }}
                   resizeMode="cover"
                 />

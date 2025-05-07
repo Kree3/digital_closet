@@ -46,18 +46,21 @@
 - **No business logic in screens.**
 - **All storage, filtering, and mutation in services.**
 
-- **Data Model:**
+  - **Data Model:**
   - Article objects may now include:
     - `croppedImageUri`: Local cropped image (Clarifai pipeline)
     - `imageUri`: Original image (Clarifai pipeline)
     - `imageUrl`: Cloud/remote image (OpenAI/DALL-E pipeline)
+    - `localImageUri`: Local persistent copy of remote images (added May 2025)
     - `boundingBox`: { x, y, w, h }
     - `maskPngB64`: base64 PNG string
     - `retouchedUrl`: URL to studio-style image
     - `metadata`: extracted attributes (color, type, etc.)
-  - **Image Field Fallback:**
-    - UI components (e.g., CategoryCarousel, CreateOutfitScreen) always render the first available image from `croppedImageUri`, `imageUri`, or `imageUrl`.
-    - This ensures robust, multi-provider support (Clarifai, OpenAI, future pipelines) and prevents blank images.
+  - **Image Field Fallback & Persistence:**
+    - UI components (e.g., CategoryCarousel, CreateOutfitScreen) always render the first available image from `localImageUri`, `croppedImageUri`, `imageUri`, or `imageUrl`.
+    - The `localImageUri` field (added May 2025) stores a local copy of remote images to solve the URL expiration issue with OpenAI DALL-E generated images.
+    - Images are automatically downloaded and stored locally when articles are created or when the app starts up (via migration).
+    - This ensures robust, multi-provider support (Clarifai, OpenAI, future pipelines) and prevents blank images even when remote URLs expire.
     - If no image field is present, a placeholder is shown.
 
 ## 4. Testing Philosophy
