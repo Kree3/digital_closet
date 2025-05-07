@@ -39,7 +39,16 @@ export default function CreateOutfitScreen() {
     try {
       await saveOutfitService({ name, articles });
       Alert.alert('Outfit saved!');
-      navigation.navigate('Outfits');
+      // Replace the current screen in the navigation stack with Outfits
+      // This prevents going back to the outfit creation screen
+      navigation.reset({
+        index: 0,
+        routes: [
+          { name: 'Home' },
+          { name: 'Gallery', params: { resetSelection: true } },
+          { name: 'Outfits' }
+        ],
+      });
     } catch (e) {
       Alert.alert('Error', e.message || 'Failed to save outfit.');
     } finally {

@@ -48,12 +48,17 @@ export async function saveOutfit({ name, articles }) {
  */
 export async function getOutfits() {
   try {
+    console.log('[outfitService] Getting outfits from storage');
     const stored = await AsyncStorage.getItem(OUTFITS_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const outfits = JSON.parse(stored);
+      console.log(`[outfitService] Found ${outfits.length} outfits in storage`);
+      return outfits;
     }
+    console.log('[outfitService] No outfits found in storage');
     return [];
   } catch (e) {
+    console.error('[outfitService] Error getting outfits:', e);
     return [];
   }
 }
