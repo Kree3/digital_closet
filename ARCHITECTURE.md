@@ -101,3 +101,50 @@
 ---
 
 **This document is intentionally concise for maximal context utility. Update as the project grows or as new conventions are adopted.**
+
+## 7. Recent Changes & Development Roadmap
+
+### Recent Implementations (May 2025)
+
+1. **Image Persistence Implementation**
+   - Added local storage for images to solve the URL expiration issue
+   - Implemented `localImageUri` field and download/storage logic
+   - Added migration for existing articles to ensure backward compatibility
+
+2. **Outfit Management System**
+   - Transformed placeholder OutfitsScreen into fully functional outfit management interface
+   - Implemented modern UI with outfit cards, preview grid, and delete functionality
+   - Added empty state handling and pull-to-refresh functionality
+
+3. **Wear Count Tracking**
+   - Added `wearCount` field to article schema (default: 0)
+   - Implemented OutfitDetailScreen with 'I Wore This Today' functionality
+   - Added tracking for both article and outfit usage statistics
+
+### Next Development Priorities
+
+1. **Modern Navigation System**
+   - Implement a bottom tab navigator for main sections (Home, Closet, Outfits, Settings)
+   - Create stack navigators within each tab for proper navigation flow
+   - Add floating action buttons for primary actions
+   - Ensure consistent header treatment across all screens
+
+2. **Usage Tracking Enhancements**
+   - Add more detailed usage analytics and visualizations
+   - Implement a dashboard view for wear statistics
+
+3. **Sorting/Filtering by Wear Count**
+   - Implement methods to sort/filter articles by wearCount
+   - Update UI to expose this functionality
+   - Add ways to identify most/least worn items
+
+4. **UI Polish and Refinement**
+   - Implement consistent design language across all screens
+   - Add subtle animations and transitions
+   - Improve empty states and loading indicators
+
+5. **Future Enhancements**
+   - Develop recommendation engine for suggesting outfits with lesser-worn items
+   - Implement calendar integration for outfit planning
+   - Add social sharing capabilities
+   - Implement automated outfit recognition
