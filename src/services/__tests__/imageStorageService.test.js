@@ -78,10 +78,24 @@ describe('imageStorageService', () => {
       expect(result).toBe(localUri);
     });
     
-    // Skip problematic test case for now
-    // TODO: Fix this test in the future
-    it.skip('should not download if image already exists', async () => {
-      // This test is skipped due to issues with mock resetting
+    it('should not download if image already exists', async () => {
+      // Setup
+      const imageUrl = 'https://example.com/image.jpg';
+      const filename = 'test-image.jpg';
+      const localUri = `${mockImageDirectory}${filename}`;
+      
+      // First mock call for initializeImageStorage
+      FileSystem.getInfoAsync.mockResolvedValueOnce({ exists: true });
+      
+      // Second mock call for the file existence check
+      FileSystem.getInfoAsync.mockResolvedValueOnce({ exists: true });
+      
+      // Execute
+      const result = await downloadAndSaveImage(imageUrl, filename);
+      
+      // Verify
+      expect(FileSystem.downloadAsync).not.toHaveBeenCalled();
+      expect(result).toBe(localUri);
     });
     
     it('should throw error if download fails', async () => {
