@@ -18,6 +18,7 @@ import VerificationScreen from './src/screens/VerificationScreen';
 import GalleryScreen from './src/screens/GalleryScreen';
 import OutfitsScreen from './src/screens/OutfitsScreen';
 import CreateOutfitScreen from './src/screens/CreateOutfitScreen';
+import OutfitDetailScreen from './src/screens/OutfitDetailScreen';
 import { runMigrations } from './src/services/migrationService';
 import { initializeImageStorage } from './src/services/imageStorageService';
 import Constants from 'expo-constants';
@@ -87,6 +88,7 @@ export default function App() {
         <Stack.Screen name="Gallery" component={GalleryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Outfits" component={OutfitsScreen} options={{ headerShown: true, title: 'Outfits' }} />
         <Stack.Screen name="CreateOutfit" component={CreateOutfitScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="OutfitDetail" component={OutfitDetailScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

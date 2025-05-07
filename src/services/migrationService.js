@@ -1,8 +1,9 @@
 // migrationService.js
 // Service for handling data migrations and fixes for the Digital Closet app
 // Addresses issues like image persistence and data model changes
+// Updated May 2025: Added wearCount migration
 
-import { getAllArticles } from './galleryService';
+import { getAllArticles, migrateArticlesWearCount } from './galleryService';
 import { migrateAllArticleImages } from './imageStorageService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GALLERY_ARTICLES_KEY } from './constants';
@@ -76,6 +77,13 @@ export async function runMigrations(currentVersion) {
     completedMigrations.push({
       name: 'image-persistence',
       ...imageMigrationResult
+    });
+    
+    // Migration: Add wearCount field to articles
+    const wearCountMigrationResult = await migrateArticlesWearCount();
+    completedMigrations.push({
+      name: 'wear-count',
+      ...wearCountMigrationResult
     });
     
     // Add more migrations here as needed

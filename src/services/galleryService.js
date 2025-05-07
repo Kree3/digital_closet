@@ -1,6 +1,7 @@
 // galleryService.js
 // Service for managing closet/gallery articles (CRUD, persistence)
 // Follows Clean Architecture: all AsyncStorage/data logic is here
+// Updated May 2025: Added wearCount tracking functionality
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GALLERY_ARTICLES_KEY } from './constants';
@@ -59,6 +60,12 @@ export async function addArticles(newArticles, options = { validateImageFields: 
     // Filter out articles with duplicate IDs
     let filteredNew = newArticles.filter(a => !existingIds.has(a.id));
     
+    // Ensure all new articles have wearCount initialized to 0
+    filteredNew = filteredNew.map(article => ({
+      ...article,
+      wearCount: article.wearCount || 0
+    }));
+    
     // Validate image fields if option is enabled
     if (options.validateImageFields) {
       filteredNew = filteredNew.filter(article => {
@@ -108,25 +115,118 @@ export async function addArticles(newArticles, options = { validateImageFields: 
  * @param {Array} idsToDelete
  * @returns {Promise<Array>} Updated array of articles
  */
-export async function deleteArticlesById(idsToDelete) {
+export async function deleteArticlesById(ids) {
   try {
-    const existing = await getAllArticles();
-    const updated = existing.filter(a => !idsToDelete.includes(a.id));
-    await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
-    return updated;
+    const articles = await getAllArticles();
+    const filtered = articles.filter(a => !ids.includes(a.id));
+    await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(filtered));
+    return filtered;
   } catch (e) {
     console.error('[galleryService] deleteArticlesById error:', e);
-    return [];
+    throw e;
   }
 }
 
 /**
- * Clear all articles from the closet.
+ * Increment the wearCount for specific articles by their IDs
+ * @param {Array<string>} articleIds - Array of article IDs to increment wear count for
+ * @returns {Promise<Array>} Updated array of all articles
+ */
+export async function incrementWearCount(articleIds) {
+  try {
+    if (!articleIds || !articleIds.length) {
+      console.warn('[galleryService] No article IDs provided to incrementWearCount');
+      return await getAllArticles();
+    }
+    
+    console.log(`[galleryService] Incrementing wearCount for ${articleIds.length} articles`);
+    const articles = await getAllArticles();
+    const idSet = new Set(articleIds);
+    
+    // Create a new array with updated wearCount values
+    const updated = articles.map(article => {
+      if (idSet.has(article.id)) {
+        // Increment wearCount, ensuring it exists and is a number
+        const currentCount = typeof article.wearCount === 'number' ? article.wearCount : 0;
+        return {
+          ...article,
+          wearCount: currentCount + 1
+        };
+      }
+      return article;
+    });
+    
+    await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.error('[galleryService] incrementWearCount error:', e);
+    throw e;
+  }
+}
+
+/**
+ * Migrate existing articles to ensure they have wearCount field
+ * @returns {Promise<{success: boolean, migratedCount: number, totalCount: number}>}
+ */
+export async function migrateArticlesWearCount() {
+  try {
+    console.log('[galleryService] Starting wearCount migration');
+    
+    // Get all articles without triggering other migrations
+    const articles = await getAllArticles({ migrateImages: false });
+    
+    if (!articles || articles.length === 0) {
+      console.log('[galleryService] No articles found to migrate wearCount');
+      return { success: true, migratedCount: 0, totalCount: 0 };
+    }
+    
+    // Count articles needing migration (those without wearCount)
+    const needsMigration = articles.filter(article => 
+      typeof article.wearCount !== 'number'
+    );
+    
+    console.log(`[galleryService] Found ${needsMigration.length} of ${articles.length} articles needing wearCount migration`);
+    
+    if (needsMigration.length === 0) {
+      return { success: true, migratedCount: 0, totalCount: articles.length };
+    }
+    
+    // Update all articles to ensure they have wearCount
+    const migratedArticles = articles.map(article => ({
+      ...article,
+      wearCount: typeof article.wearCount === 'number' ? article.wearCount : 0
+    }));
+    
+    // Save the migrated articles back to storage
+    await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(migratedArticles));
+    
+    console.log(`[galleryService] Successfully migrated wearCount for ${needsMigration.length} articles`);
+    
+    return { 
+      success: true, 
+      migratedCount: needsMigration.length, 
+      totalCount: articles.length 
+    };
+  } catch (error) {
+    console.error('[galleryService] Error during wearCount migration:', error);
+    return { 
+      success: false, 
+      error: error.message || String(error),
+      migratedCount: 0, 
+      totalCount: 0 
+    };
+  }
+}
+
+/**
+ * Clear all articles from the closet (dev utility).
  * @returns {Promise<void>}
  */
 export async function clearAllArticles() {
-  await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
-  // Optionally verify removal in debug mode
-  // const verify = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);
-  // console.log('[galleryService] clearAllArticles, value after clear:', verify);
+  try {
+    await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
+  } catch (e) {
+    console.error('[galleryService] clearAllArticles error:', e);
+    throw e;
+  }
 }

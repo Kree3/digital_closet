@@ -1,9 +1,11 @@
 // outfitService.js
 // Service module for managing outfits in Digital Closet
 // Handles all AsyncStorage operations and business logic for outfits
+// Updated May 2025: Added functionality to track outfit usage
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
+import { incrementWearCount } from './galleryService';
 
 const OUTFITS_KEY = 'OUTFITS';
 
@@ -76,5 +78,66 @@ export async function removeOutfit(id) {
     await AsyncStorage.setItem(OUTFITS_KEY, JSON.stringify(outfits));
   } catch (e) {
     console.error('[outfitService] Failed to remove outfit:', e);
+  }
+}
+
+/**
+ * Mark an outfit as worn, incrementing the wearCount for all articles in the outfit
+ * @param {string} outfitId - ID of the outfit that was worn
+ * @returns {Promise<{success: boolean, articlesUpdated: number}>}
+ */
+export async function markOutfitAsWorn(outfitId) {
+  try {
+    console.log(`[outfitService] Marking outfit ${outfitId} as worn`);
+    
+    // Get the outfit
+    const outfits = await getOutfits();
+    const outfit = outfits.find(o => o.id === outfitId);
+    
+    if (!outfit) {
+      console.error(`[outfitService] Outfit with ID ${outfitId} not found`);
+      return { success: false, articlesUpdated: 0, error: 'Outfit not found' };
+    }
+    
+    // Get the article IDs from the outfit
+    const { articleIds } = outfit;
+    
+    if (!articleIds || !articleIds.length) {
+      console.warn(`[outfitService] Outfit ${outfitId} has no articles`);
+      return { success: true, articlesUpdated: 0 };
+    }
+    
+    // Increment wear count for all articles in the outfit
+    await incrementWearCount(articleIds);
+    
+    // Update the outfit's lastWorn date (for potential future use)
+    const updatedOutfits = outfits.map(o => {
+      if (o.id === outfitId) {
+        return {
+          ...o,
+          lastWorn: new Date().toISOString(),
+          wearCount: (o.wearCount || 0) + 1
+        };
+      }
+      return o;
+    });
+    
+    // Save the updated outfits
+    await AsyncStorage.setItem(OUTFITS_KEY, JSON.stringify(updatedOutfits));
+    
+    console.log(`[outfitService] Successfully marked outfit ${outfitId} as worn, updated ${articleIds.length} articles`);
+    
+    return { 
+      success: true, 
+      articlesUpdated: articleIds.length,
+      outfit: updatedOutfits.find(o => o.id === outfitId)
+    };
+  } catch (error) {
+    console.error('[outfitService] Error marking outfit as worn:', error);
+    return { 
+      success: false, 
+      articlesUpdated: 0, 
+      error: error.message || String(error)
+    };
   }
 }

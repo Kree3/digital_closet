@@ -52,6 +52,7 @@
     - `imageUri`: Original image (Clarifai pipeline)
     - `imageUrl`: Cloud/remote image (OpenAI/DALL-E pipeline)
     - `localImageUri`: Local persistent copy of remote images (added May 2025)
+    - `wearCount`: Number of times the article has been worn (added May 2025)
     - `boundingBox`: { x, y, w, h }
     - `maskPngB64`: base64 PNG string
     - `retouchedUrl`: URL to studio-style image
@@ -62,6 +63,11 @@
     - Images are automatically downloaded and stored locally when articles are created or when the app starts up (via migration).
     - This ensures robust, multi-provider support (Clarifai, OpenAI, future pipelines) and prevents blank images even when remote URLs expire.
     - If no image field is present, a placeholder is shown.
+  - **Outfit Usage & Wear Tracking:**
+    - Outfits can be marked as worn via the OutfitDetailScreen.
+    - The `wearCount` field tracks how many times each article has been worn.
+    - When an outfit is marked as worn, the wearCount for all articles in that outfit is incremented.
+    - Outfits also track their own wear count and last worn date for future features.
 
 ## 4. Testing Philosophy
 

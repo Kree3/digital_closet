@@ -171,12 +171,8 @@ export default function OutfitsScreen() {
       <TouchableOpacity 
         style={styles.outfitCard}
         onPress={() => {
-          // TODO: Navigate to outfit detail screen in the future
-          Alert.alert(
-            outfit.name,
-            `This outfit contains ${articleCount} items.`,
-            [{ text: 'OK' }]
-          );
+          // Navigate to the outfit detail screen
+          navigation.navigate('OutfitDetail', { outfit });
         }}
       >
         <View style={styles.previewGrid}>
