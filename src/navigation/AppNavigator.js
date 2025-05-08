@@ -97,34 +97,18 @@ function FabMenu({ navigation, onClose }) {
         activeOpacity={1} 
         onPress={onClose} 
       />
-      <View style={styles.fabMenuContent}>
+      <View style={styles.fabMenuButtonsContainer}>
         <TouchableOpacity 
-          style={styles.fabMenuItem}
-          onPress={takePhoto}
-        >
-          <View style={styles.fabMenuItemIcon}>
-            <Ionicons name="camera" size={24} color="#fff" />
-          </View>
-          <View style={styles.fabMenuItemText}>
-            <View style={styles.fabMenuItemTextContent}>
-              <Ionicons name="camera" size={24} color="#42a5f5" style={styles.fabMenuIcon} />
-              <Text style={styles.fabMenuItemLabel}>Take a photo</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.fabMenuItem}
+          style={styles.fabMenuButton}
           onPress={pickImage}
         >
-          <View style={styles.fabMenuItemIcon}>
-            <Ionicons name="image" size={24} color="#fff" />
-          </View>
-          <View style={styles.fabMenuItemText}>
-            <View style={styles.fabMenuItemTextContent}>
-              <Ionicons name="image" size={24} color="#42a5f5" style={styles.fabMenuIcon} />
-              <Text style={styles.fabMenuItemLabel}>Upload a photo</Text>
-            </View>
-          </View>
+          <Ionicons name="image" size={32} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.fabMenuButton, styles.fabMenuButtonBottom]}
+          onPress={takePhoto}
+        >
+          <Ionicons name="camera" size={32} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
@@ -188,7 +172,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
             >
               <Ionicons
                 name={options.tabBarIconName}
-                size={24}
+                size={28}
                 color={isFocused ? '#42a5f5' : '#8e8e93'}
               />
             </TouchableOpacity>
@@ -272,14 +256,14 @@ function TabNavigator() {
         name="Wardrobe" 
         component={WardrobeStack} 
         options={{
-          tabBarIconName: 'shirt',
+          tabBarIconName: 'file-tray-full',
         }}
       />
       <Tab.Screen 
         name="Outfits" 
         component={OutfitsStack} 
         options={{
-          tabBarIconName: 'person',
+          tabBarIconName: 'layers',
         }}
       />
       <Tab.Screen 
@@ -344,7 +328,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
-    bottom: 10,
+    bottom: 28,
   },
   fabMenuContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -354,46 +338,29 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  fabMenuContent: {
+  fabMenuButtonsContainer: {
     position: 'absolute',
-    bottom: 80,
-    right: 24,
-    left: 24,
-  },
-  fabMenuItem: {
-    flexDirection: 'row',
+    bottom: '20%',  // Position lower on the screen
+    right: 30,
+    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  fabMenuItemIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  fabMenuButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: '#42a5f5',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-  },
-  fabMenuItemText: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    marginBottom: 40,
   },
-  fabMenuItemTextContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fabMenuIcon: {
-    marginRight: 8,
-  },
-  fabMenuItemLabel: {
-    fontSize: 16,
-    color: '#333',
+  fabMenuButtonBottom: {
+    marginBottom: 0,
   },
 });
