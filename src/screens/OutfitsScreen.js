@@ -214,12 +214,6 @@ export default function OutfitsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Outfits</Text>
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={navigateToCreateOutfit}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
       
       <FlatList

@@ -1,8 +1,8 @@
 // GalleryScreen.js
 //
-// Gallery Screen for Digital Closet
+// Wardrobe Screen for Digital Closet
 // --------------------------------
-// Displays the user's confirmed clothing articles in a grid ("My Closet").
+// Displays the user's confirmed clothing articles in a grid ("My Wardrobe").
 // Features:
 //   - Modular data model and AsyncStorage persistence
 //   - Category carousel and grid layout for articles
@@ -132,14 +132,7 @@ export default function GalleryScreen({ navigation, route }) {
         <Text style={styles.clearButtonText}>Clear Closet (Dev)</Text>
       </TouchableOpacity>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>My Closet</Text>
-        <TouchableOpacity
-          style={styles.homeIconButton}
-          onPress={() => navigation.navigate('Home')}
-          accessibilityLabel="Go to Home"
-        >
-          <Ionicons name="home" size={32} color="#42a5f5" />
-        </TouchableOpacity>
+        <Text style={styles.title}>My Wardrobe</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

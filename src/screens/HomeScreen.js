@@ -2,90 +2,58 @@
 //
 // Home Screen for Digital Closet
 // ------------------------------
-// Allows users to take a photo or upload one from their gallery to start the clothing detection flow.
+// Main dashboard screen showing user stats and recent activity.
 // Features:
-//   - Camera and gallery integration (via mediaService)
-//   - Permission handling and user feedback (via mediaService)
-//   - Clean, modern UI with clear navigation
+//   - Usage statistics and visualizations
+//   - Recent outfits and articles
+//   - Clean, modern UI with bottom tab navigation
 //
-// Designed for reliability and a seamless user experience.
+// Designed for an engaging and informative user experience.
 import React from 'react';
-import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { takePhotoWithPermission, pickImageWithPermission } from '../services/mediaService';
-import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen({ navigation }) {
-  // Handles taking a photo using the media service
-  const takePhoto = async () => {
-    const result = await takePhotoWithPermission();
-    console.log('[HomeScreen] takePhoto result:', result);
-    if (result.assets && result.assets[0]?.base64) {
-      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.assets[0].base64}` });
-    } else if (result.base64) {
-      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.base64}` });
-    } else if (result.imageUri || result.uri) {
-      const uri = result.imageUri || result.uri;
-      try {
-        const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-        navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${base64}` });
-      } catch (e) {
-        console.error('[HomeScreen] Failed to read image as base64:', e);
-        navigation.navigate('Verify', { imageUri: uri });
-      }
-    } else if (result.canceled) {
-      Alert.alert('No photo selected', 'You cancelled taking a photo.');
-    } else if (result.error) {
-      Alert.alert('Camera Error', result.error);
-    }
-  };
-
-  // Handles picking a photo from gallery using the media service
-  const pickImage = async () => {
-    const result = await pickImageWithPermission();
-    console.log('[HomeScreen] pickImage result:', result);
-    if (result.assets && result.assets[0]?.base64) {
-      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.assets[0].base64}` });
-    } else if (result.base64) {
-      navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${result.base64}` });
-    } else if (result.imageUri || result.uri) {
-      const uri = result.imageUri || result.uri;
-      try {
-        const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-        navigation.navigate('Verify', { imageUri: `data:image/jpeg;base64,${base64}` });
-      } catch (e) {
-        console.error('[HomeScreen] Failed to read image as base64:', e);
-        navigation.navigate('Verify', { imageUri: uri });
-      }
-    } else if (result.canceled) {
-      Alert.alert('No photo selected', 'You cancelled selecting a photo.');
-    } else if (result.error) {
-      Alert.alert('Gallery Error', result.error);
-    }
-  };
+  // We'll keep the media functions for reference, but they'll be called from the FAB now
+  // These functions can be moved to a separate service if needed
 
   return (
     <View style={styles.container}>
-      <View style={styles.gridContainer}>
-        <View style={styles.gridRow}>
-          <TouchableOpacity style={styles.iconButton} onPress={takePhoto} accessibilityLabel="Take Photo">
-            <Ionicons name="camera" size={48} color="#42a5f5" />
-            <Text style={styles.iconLabel}>Take Photo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={pickImage} accessibilityLabel="Upload Photo">
-            <Ionicons name="image" size={48} color="#42a5f5" />
-            <Text style={styles.iconLabel}>Upload Photo</Text>
-          </TouchableOpacity>
+      <View style={styles.header}>
+        <Text style={styles.title}>Digital Closet</Text>
+      </View>
+      
+      <View style={styles.statsContainer}>
+        <Text style={styles.sectionTitle}>Your Stats</Text>
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statLabel}>Articles</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statLabel}>Outfits</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statLabel}>This Week</Text>
+          </View>
         </View>
-        <View style={styles.gridRow}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Gallery')} accessibilityLabel="Go to Gallery">
-            <Ionicons name="grid" size={48} color="#42a5f5" />
-            <Text style={styles.iconLabel}>Gallery</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Outfits')} accessibilityLabel="Go to Outfits">
-            <Ionicons name="shirt-outline" size={48} color="#42a5f5" />
-            <Text style={styles.iconLabel}>Outfits</Text>
-          </TouchableOpacity>
+      </View>
+      
+      <View style={styles.recentContainer}>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <View style={styles.emptyState}>
+          <Ionicons name="time-outline" size={48} color="#b0bec5" />
+          <Text style={styles.emptyStateText}>Your recent activity will appear here</Text>
+        </View>
+      </View>
+      
+      <View style={styles.tipsContainer}>
+        <Text style={styles.sectionTitle}>Tips</Text>
+        <View style={styles.tipCard}>
+          <Ionicons name="bulb-outline" size={24} color="#42a5f5" style={styles.tipIcon} />
+          <Text style={styles.tipText}>Use the + button to add new items to your wardrobe</Text>
         </View>
       </View>
     </View>
@@ -95,33 +63,86 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#fff',
+    paddingHorizontal: 16,
   },
-  gridContainer: {
-    justifyContent: 'center',
+  header: {
+    paddingTop: 60,
+    paddingBottom: 20,
     alignItems: 'center',
   },
-  gridRow: {
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333',
+  },
+  statsContainer: {
+    marginTop: 20,
+  },
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 12,
+    justifyContent: 'space-between',
   },
-  iconButton: {
-    alignItems: 'center',
-    marginHorizontal: 24,
-    padding: 12,
+  statCard: {
+    backgroundColor: '#f5f5f5',
     borderRadius: 12,
-    backgroundColor: '#f7f7f7',
+    padding: 16,
+    alignItems: 'center',
+    width: '30%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 2,
-    minWidth: 110,
   },
-  iconLabel: {
-    fontSize: 15,
-    color: '#222',
-    marginTop: 8,
-    fontWeight: '500',
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#42a5f5',
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  recentContainer: {
+    marginTop: 30,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    padding: 30,
+    marginVertical: 10,
+  },
+  emptyStateText: {
+    color: '#666',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  tipsContainer: {
+    marginTop: 30,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e3f2fd',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 8,
+  },
+  tipIcon: {
+    marginRight: 12,
+  },
+  tipText: {
+    color: '#333',
+    flex: 1,
   },
 });

@@ -4,27 +4,20 @@
 // ----------------------------------
 // Sets up navigation and screen flow for the app.
 // Features:
-//   - Stack navigation for Home, Verification, Gallery, Outfits, and CreateOutfit screens
+//   - Modern navigation system with bottom tabs and FAB
 //   - Clean separation of concerns and maintainable structure
 //   - Data migrations run at startup (image persistence, etc.)
 //
 // Designed for scalability and clear navigation.
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import HomeScreen from './src/screens/HomeScreen';
-import VerificationScreen from './src/screens/VerificationScreen';
-import GalleryScreen from './src/screens/GalleryScreen';
-import OutfitsScreen from './src/screens/OutfitsScreen';
-import CreateOutfitScreen from './src/screens/CreateOutfitScreen';
-import OutfitDetailScreen from './src/screens/OutfitDetailScreen';
+import AppNavigator from './src/navigation/AppNavigator';
 import { runMigrations } from './src/services/migrationService';
 import { initializeImageStorage } from './src/services/imageStorageService';
 import Constants from 'expo-constants';
 
 
-const Stack = createStackNavigator();
+// Loading screen component shown during migrations
 
 // Loading screen component shown during migrations
 function LoadingScreen({ status }) {
@@ -80,18 +73,7 @@ export default function App() {
     return <LoadingScreen status={loadingStatus} />;
   }
 
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Verify" component={VerificationScreen} />
-        <Stack.Screen name="Gallery" component={GalleryScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Outfits" component={OutfitsScreen} options={{ headerShown: true, title: 'Outfits' }} />
-        <Stack.Screen name="CreateOutfit" component={CreateOutfitScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="OutfitDetail" component={OutfitDetailScreen} options={{ headerShown: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+  return <AppNavigator />;
 }
 
 const styles = StyleSheet.create({
