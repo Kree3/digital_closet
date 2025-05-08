@@ -37,6 +37,7 @@ const Tab = createBottomTabNavigator();
 import { takePhotoWithPermission, pickImageWithPermission } from '../services/mediaService';
 import * as FileSystem from 'expo-file-system';
 import { Alert } from 'react-native';
+import { clearAllArticles } from '../services/galleryService';
 
 // FAB Menu component that appears when + button is pressed
 function FabMenu({ navigation, onClose }) {
@@ -98,6 +99,34 @@ function FabMenu({ navigation, onClose }) {
         onPress={onClose} 
       />
       <View style={styles.fabMenuButtonsContainer}>
+        <TouchableOpacity 
+          style={[styles.fabMenuButton, styles.fabMenuButtonDanger]}
+          onPress={async () => {
+            onClose();
+            Alert.alert(
+              'Clear Closet',
+              'Are you sure you want to clear all articles? This cannot be undone.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { 
+                  text: 'Clear', 
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await clearAllArticles();
+                      Alert.alert('Success', 'Closet cleared successfully.');
+                    } catch (e) {
+                      console.error('[AppNavigator] Error clearing closet:', e);
+                      Alert.alert('Error', 'Failed to clear closet.');
+                    }
+                  }
+                }
+              ]
+            );
+          }}
+        >
+          <Ionicons name="bug" size={32} color="#fff" />
+        </TouchableOpacity>
         <TouchableOpacity 
           style={styles.fabMenuButton}
           onPress={pickImage}
@@ -365,5 +394,9 @@ const styles = StyleSheet.create({
   },
   fabMenuButtonBottom: {
     marginBottom: 0,
+  },
+  fabMenuButtonDanger: {
+    backgroundColor: '#e74c3c',
+    marginTop: 40,
   },
 });

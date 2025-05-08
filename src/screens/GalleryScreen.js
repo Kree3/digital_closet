@@ -127,10 +127,6 @@ export default function GalleryScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* Developer-only: Clear Closet button */}
-      <TouchableOpacity onPress={handleClearCloset} style={styles.clearButton}>
-        <Text style={styles.clearButtonText}>Clear Closet (Dev)</Text>
-      </TouchableOpacity>
       <View style={styles.headerRow}>
         <Text style={styles.title}>My Wardrobe</Text>
       </View>
@@ -238,15 +234,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 72, // Increased space below the status bar for a cleaner look
+    paddingTop: 20,
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingTop: 50,  // Increased top padding to match OutfitsScreen
+    paddingBottom: 16,
+    backgroundColor: '#fff',
   },
   homeIconButton: {
     padding: 4,
@@ -261,9 +258,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#333',
   },
   selectAllBar: {
     flexDirection: 'row',

@@ -67,12 +67,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingTop: 65,  // Fine-tuned top padding for perfect positioning
+    paddingBottom: 16,
+    marginLeft: 4,  // Slight adjustment to align with other content
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
   },
