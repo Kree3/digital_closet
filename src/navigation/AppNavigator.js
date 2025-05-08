@@ -142,7 +142,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
                 onPress={() => setFabOpen(!fabOpen)}
               >
                 <View style={styles.fab}>
-                  <Ionicons name="add" size={30} color="#fff" />
+                  <Ionicons name="add" size={34} color="#fff" />
                 </View>
               </TouchableOpacity>
             );
@@ -256,14 +256,14 @@ function TabNavigator() {
         name="Wardrobe" 
         component={WardrobeStack} 
         options={{
-          tabBarIconName: 'file-tray-full',
+          tabBarIconName: 'file-tray-stacked',
         }}
       />
       <Tab.Screen 
         name="Outfits" 
         component={OutfitsStack} 
         options={{
-          tabBarIconName: 'layers',
+          tabBarIconName: 'shirt-outline',
         }}
       />
       <Tab.Screen 
@@ -315,11 +315,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingRight: 10,
+    paddingBottom: 5,
   },
   fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#42a5f5',
     justifyContent: 'center',
     alignItems: 'center',
@@ -330,6 +332,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     bottom: 28,
   },
+
   fabMenuContainer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 100,
