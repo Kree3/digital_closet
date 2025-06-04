@@ -4,61 +4,116 @@
 
 import { processGarmentImage, dataUriToBlob } from '../garmentVisionService';
 
-global.fetch = jest.fn();
+// Mock the dynamically imported services and other direct imports
+jest.mock('../garmentDescriptionService.js', () => ({
+  describeGarmentImage: jest.fn(),
+}));
+jest.mock('../garmentImageGenerationService.js', () => ({
+  generateGarmentImage: jest.fn(),
+}));
+jest.mock('../imageStorageService.js', () => ({
+  downloadAndSaveImage: jest.fn(),
+}));
+
+// Import the mocked functions to easily access/reset them
+import { describeGarmentImage } from '../garmentDescriptionService.js';
+import { generateGarmentImage } from '../garmentImageGenerationService.js';
+import { downloadAndSaveImage } from '../imageStorageService.js';
+
+global.fetch = jest.fn(); // If any part of the service (not covered by above mocks) uses fetch
 
 describe('garmentVisionService', () => {
-  it('should set imageUrl to null and add .error on DALL-E failure', async () => {
-    // Mock describeGarmentImage to return a single article
-    const mockDescribe = jest.fn().mockResolvedValue([{ id: 1, description: 'test shirt', category: 'shirt', color: 'blue' }]);
-    jest.doMock('../garmentDescriptionService', () => ({ describeGarmentImage: mockDescribe }));
-    // Mock generateGarmentImage to throw
-    jest.doMock('../garmentImageGenerationService', () => ({ generateGarmentImage: () => { throw new Error('DALL-E failed'); } }));
-    const { processGarmentImage } = require('../garmentVisionService');
-    const result = await processGarmentImage('dummy', { openaiApiKey: 'sk-test' });
+  beforeEach(() => {
+    // Clear all mocks before each test
+    fetch.mockClear();
+    describeGarmentImage.mockClear();
+    generateGarmentImage.mockClear();
+    downloadAndSaveImage.mockClear();
+  });
+
+  it('should set imageUrl to null and add .error on generateGarmentImage failure', async () => {
+    const dummyBase64 = 'dummy-base64-image';
+    const mockApiOptions = { openaiApiKey: 'sk-test' };
+    const mockDescriptionResult = [{ id: 1, description: 'test shirt', category: 'shirt', color: 'blue' }];
+
+    describeGarmentImage.mockResolvedValue(mockDescriptionResult);
+    generateGarmentImage.mockRejectedValue(new Error('DALL-E failed'));
+    // downloadAndSaveImage will not be called if generateGarmentImage fails
+
+    const result = await processGarmentImage(dummyBase64, mockApiOptions);
+    
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
     expect(result[0].imageUrl).toBeNull();
     expect(result[0].error).toBe('DALL-E failed');
-  });
-  beforeEach(() => {
-    fetch.mockClear();
-  });
-
-  it('should throw if no API key is provided', async () => {
-    await expect(processGarmentImage('dummy', {})).rejects.toThrow('Missing OpenAI API key');
+    expect(describeGarmentImage).toHaveBeenCalledWith(dummyBase64, mockApiOptions);
+    expect(generateGarmentImage).toHaveBeenCalledWith(mockDescriptionResult[0].description, mockApiOptions);
+    expect(downloadAndSaveImage).not.toHaveBeenCalled();
   });
 
-  it('should call GPT-4o-mini and DALL-E endpoints and return processed data', async () => {
-    // Mock GPT-4o-mini response
-    // Use a minimal valid PNG base64 string
+  it('should return an error object if no API key is provided', async () => {
+    const result = await processGarmentImage('dummy', {}); // No API key
+    expect(result).toEqual({
+      error: true,
+      message: 'Missing OpenAI API key',
+      stage: 'pipeline', // As it's caught by the main try-catch
+    });
+  });
+
+  it('should return processed data including localImageUri from mocked services', async () => {
     const defaultBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAUA';
-    fetch.mockResolvedValueOnce({
-      json: async () => ({
-        choices: [
-          { message: { content: JSON.stringify({
-            bounding_box: { x: 10, y: 20, w: 100, h: 200 },
-            mask_png_b64: defaultBase64,
-            metadata: { color: 'black', type: 'shirt' }
-          }) } }
-        ]
-      })
-    });
-    // Mock DALL-E edits response
-    fetch.mockResolvedValueOnce({
-      json: async () => ({ data: [ { url: 'https://mocked-url.com/retouched.png' } ] })
-    });
+    const mockApiOptions = { openaiApiKey: 'test-key' };
+    const mockDescription = [{ id: 'item1', description: 'black shirt', category: 'shirt', color: 'black' }];
+    const mockGeneratedUrl = 'https://mocked-url.com/retouched.png';
+    const mockLocalUrl = 'file:///local/retouched.png';
 
-    const result = await processGarmentImage(defaultBase64, { openaiApiKey: 'test-key' });
-    expect(result.boundingBox).toEqual({ x: 10, y: 20, w: 100, h: 200 });
-    expect(result.maskPngB64).toBe(defaultBase64);
-    expect(result.retouchedUrl).toBe('https://mocked-url.com/retouched.png');
-    expect(result.metadata).toEqual({ color: 'black', type: 'shirt' });
-    expect(fetch).toHaveBeenCalledTimes(2);
+    describeGarmentImage.mockResolvedValue(mockDescription);
+    generateGarmentImage.mockResolvedValue(mockGeneratedUrl);
+    downloadAndSaveImage.mockResolvedValue(mockLocalUrl);
+
+    const result = await processGarmentImage(defaultBase64, mockApiOptions);
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
+    const articleResult = result[0];
+    expect(articleResult.id).toBe('item1');
+    expect(articleResult.description).toBe('black shirt');
+    expect(articleResult.imageUrl).toBe(mockGeneratedUrl);
+    expect(articleResult.localImageUri).toBe(mockLocalUrl);
+
+    expect(describeGarmentImage).toHaveBeenCalledWith(defaultBase64, mockApiOptions);
+    expect(generateGarmentImage).toHaveBeenCalledWith(mockDescription[0].description, mockApiOptions);
+    expect(downloadAndSaveImage).toHaveBeenCalledWith(mockGeneratedUrl);
   });
 
-  it('should throw if GPT-4o-mini response is malformed', async () => {
-    fetch.mockResolvedValueOnce({
-      json: async () => ({ choices: [ { message: { content: 'not-json' } } ] })
+  it('should handle errors from describeGarmentImage and return error object', async () => {
+    const dummyBase64 = 'img';
+    const mockApiOptions = { openaiApiKey: 'key' };
+    describeGarmentImage.mockRejectedValue(new Error('GPT-4o-mini failed'));
+
+    const result = await processGarmentImage(dummyBase64, mockApiOptions);
+    
+    // The error from describeGarmentImage is caught by the inner try-catch in processGarmentImage
+    // which then returns an error object specific to that stage.
+    expect(result).toEqual({
+      error: true,
+      message: 'GPT-4o-mini failed',
+      stage: 'describeGarmentImage',
     });
-    await expect(processGarmentImage('img', { openaiApiKey: 'key' })).rejects.toThrow('Failed to parse GPT-4o-mini response');
+  });
+
+  it('should return an error object if no clothing items are detected by describeGarmentImage', async () => {
+    const dummyBase64 = 'empty-image';
+    const mockApiOptions = { openaiApiKey: 'test-key' };
+    describeGarmentImage.mockResolvedValue([]); // No items detected
+
+    const result = await processGarmentImage(dummyBase64, mockApiOptions);
+
+    expect(result).toEqual({
+      error: true,
+      message: 'No clothing items detected in the image.',
+      stage: 'describeGarmentImage',
+    });
   });
 
   it('dataUriToBlob returns a Blob object', () => {

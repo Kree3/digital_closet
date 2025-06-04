@@ -30,7 +30,7 @@ const images = UNSAFE_getAllByType(Image);
     expect(images[1].props.source.uri).toBe('clarifai-image.png');
     expect(images[2].props.source.uri).toBe('openai-image.png');
     expect(images[3].props.source.uri).toBe('cropped.png'); // croppedImageUri takes precedence
-    expect(images[4].props.source.uri).toBeUndefined(); // No image fields
+    expect(images.length).toBe(4); // Expect 4 Image components, as the 5th article renders a placeholder View
   });
 });
 
