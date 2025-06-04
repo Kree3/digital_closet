@@ -13,7 +13,7 @@ import { migrateAllArticleImages, migrateArticleImage } from './imageStorageServ
  * @param {boolean} [options.migrateImages=false] - If true, migrate remote images to local storage
  * @returns {Promise<Array>} Array of articles (empty if none)
  */
-export async function getAllArticles(options = { migrateImages: false }) {
+export async function getAllArticles(options = { migrateImages: true }) {
   // Debug: Log raw AsyncStorage value
   try {
     const stored = await AsyncStorage.getItem(GALLERY_ARTICLES_KEY);

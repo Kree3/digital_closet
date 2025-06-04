@@ -13,53 +13,6 @@ import { GALLERY_ARTICLES_KEY } from './constants';
  * This fixes the image persistence issue with expiring OpenAI DALL-E URLs
  * @returns {Promise<{success: boolean, migratedCount: number, totalCount: number}>}
  */
-export async function migrateRemoteImagesToLocal() {
-  try {
-    console.log('[migrationService] Starting image persistence migration');
-    
-    // Get all articles without triggering automatic migration
-    const articles = await getAllArticles({ migrateImages: false });
-    
-    if (!articles || articles.length === 0) {
-      console.log('[migrationService] No articles found to migrate');
-      return { success: true, migratedCount: 0, totalCount: 0 };
-    }
-    
-    // Count articles needing migration (those with imageUrl but no localImageUri)
-    const needsMigration = articles.filter(article => 
-      article.imageUrl && !article.localImageUri
-    );
-    
-    console.log(`[migrationService] Found ${needsMigration.length} of ${articles.length} articles needing image migration`);
-    
-    if (needsMigration.length === 0) {
-      return { success: true, migratedCount: 0, totalCount: articles.length };
-    }
-    
-    // Migrate all articles
-    const migratedArticles = await migrateAllArticleImages(articles);
-    
-    // Save the migrated articles back to storage
-    await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(migratedArticles));
-    
-    console.log(`[migrationService] Successfully migrated ${needsMigration.length} articles`);
-    
-    return { 
-      success: true, 
-      migratedCount: needsMigration.length, 
-      totalCount: articles.length 
-    };
-  } catch (error) {
-    console.error('[migrationService] Error during image persistence migration:', error);
-    return { 
-      success: false, 
-      error: error.message || String(error),
-      migratedCount: 0, 
-      totalCount: 0 
-    };
-  }
-}
-
 /**
  * Run all necessary migrations based on app version
  * This function should be called during app startup
@@ -71,13 +24,6 @@ export async function runMigrations(currentVersion) {
     console.log(`[migrationService] Running migrations for version ${currentVersion}`);
     
     const completedMigrations = [];
-    
-    // Migration: Image persistence
-    const imageMigrationResult = await migrateRemoteImagesToLocal();
-    completedMigrations.push({
-      name: 'image-persistence',
-      ...imageMigrationResult
-    });
     
     // Migration: Add wearCount field to articles
     const wearCountMigrationResult = await migrateArticlesWearCount();
