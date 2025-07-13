@@ -1,6 +1,6 @@
-# Digital Closet – Architecture Overview
+# Digital Closet – Project Context for Claude Code
 
-> **Purpose:** This document seeds essential project context for both human and AI contributors, maximizing the value of any model’s context window. It enables rapid, accurate onboarding and ensures all future development aligns with the project’s standards for modularity, testability, and scalability.
+> **Purpose:** This document provides essential project context for Claude Code, maximizing the value of the context window for rapid, accurate development assistance. It enables immediate understanding of the codebase architecture, conventions, and development patterns to ensure all contributions align with the project's standards for modularity, testability, and scalability.
 
 ---
 
@@ -69,23 +69,36 @@
     - When an outfit is marked as worn, the wearCount for all articles in that outfit is incremented.
     - Outfits also track their own wear count and last worn date for future features.
 
-## 4. Testing Philosophy
+## 4. Development Commands
 
-- **Jest is used for all service modules.**
-- **Regression suite:** Every meaningful new feature or bug fix should add a test case.
-- **Run tests anytime with:**
+- **Start development server:**
+  ```sh
+  expo start
+  ```
+- **Run on specific platform:**
+  ```sh
+  expo start --ios    # iOS simulator
+  expo start --android # Android emulator  
+  expo start --web     # Web browser
+  ```
+- **Run tests:**
   ```sh
   npx jest
   ```
+
+## 5. Testing Philosophy
+
+- **Jest is used for all service modules.**
+- **Regression suite:** Every meaningful new feature or bug fix should add a test case.
 - **Test files live in `/src/services/__tests__/`**
 
-## 5. Naming & Conventions
+## 6. Naming & Conventions
 
 - **Service modules:** Named after their domain (e.g., galleryService.js, outfitService.js).
 - **Screens:** Named after their UI function (e.g., GalleryScreen.js).
 - **UUID:** Always use the provided uuid.js wrapper for unique IDs.
 
-## 6. Extending & Onboarding
+## 7. Extending & Onboarding
 
 - **To add a new feature:**
   1. Implement business logic in a new or existing service module.
@@ -102,7 +115,7 @@
 
 **This document is intentionally concise for maximal context utility. Update as the project grows or as new conventions are adopted.**
 
-## 7. Recent Changes & Development Roadmap
+## 8. Recent Changes & Development Roadmap
 
 ### Recent Implementations (May 2025)
 
