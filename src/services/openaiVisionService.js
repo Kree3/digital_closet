@@ -23,20 +23,22 @@ export async function separateClothingItemsWithOpenAI(imageUri) {
   }
 
   // Prepare OpenAI Vision API payload
-  const apiUrl = 'https://api.openai.com/v1/responses';
-  const prompt = `You are the world's foremost fashion merchandiser and image retoucher with an exceptional eye for style and detail in online retail photography. Your task is as follows:\n\n1. Given the uploaded photo of an outfit, analyze and identify each individual piece of clothing (e.g., t-shirts, jackets, skirts, pants).\n2. For each article of clothing:\n   - Precisely detect its boundaries (provide cropping coordinates as {top, left, bottom, right} percentages of the image, between 0 and 1).\n   - Describe the garment’s type, color, fabric, and any other notable features.\n3. Produce a re-rendered, high-quality product image for each garment that meets the following criteria:\n   - Style: Emulate professional product images as seen on high-end online retailers like Uniqlo.\n   - Background: Replace the original background with a pure white, studio-quality backdrop.\n   - Lighting: Ensure uniform, soft, and even lighting across the entire garment.\n   - Composition: Center the clothing item without distractions or additional elements.\n   - Output: If possible, return the generated product image as a base64-encoded JPEG string. If not possible, describe how the image would look.\n\nReturn your results as a JSON array, with each item containing:\n- garment_type\n- attributes (e.g., color, fabric)\n- bounding_box (coordinates)\n- product_image (base64 string or description)`;
+  const apiUrl = 'https://api.openai.com/v1/chat/completions';
+  const prompt = `You are the world's foremost fashion merchandiser and image retoucher with an exceptional eye for style and detail in online retail photography. Your task is as follows:\n\n1. Given the uploaded photo of an outfit, analyze and identify each individual piece of clothing (e.g., t-shirts, jackets, skirts, pants).\n2. For each article of clothing:\n   - Precisely detect its boundaries (provide cropping coordinates as {top, left, bottom, right} percentages of the image, between 0 and 1).\n   - Describe the garment's type, color, fabric, and any other notable features.\n3. Produce a re-rendered, high-quality product image for each garment that meets the following criteria:\n   - Style: Emulate professional product images as seen on high-end online retailers like Uniqlo.\n   - Background: Replace the original background with a pure white, studio-quality backdrop.\n   - Lighting: Ensure uniform, soft, and even lighting across the entire garment.\n   - Composition: Center the clothing item without distractions or additional elements.\n   - Output: If possible, return the generated product image as a base64-encoded JPEG string. If not possible, describe how the image would look.\n\nReturn your results as a JSON array, with each item containing:\n- garment_type\n- attributes (e.g., color, fabric)\n- bounding_box (coordinates)\n- product_image (base64 string or description)`;
   if (__DEV__) console.log('[openaiVisionService] Using prompt:', prompt);
   const payload = {
     model: 'gpt-4o', // Cheapest vision model as of 2024
-    input: [
+    messages: [
       {
         role: 'user',
         content: [
-          { type: 'input_text', text: prompt },
+          { type: 'text', text: prompt },
           {
-            type: 'input_image',
-            image_url: `data:image/jpeg;base64,${base64Image}`,
-            detail: 'low', // Use cheapest token option
+            type: 'image_url',
+            image_url: {
+              url: `data:image/jpeg;base64,${base64Image}`,
+              detail: 'low' // Use cheapest token option
+            }
           },
         ],
       },
@@ -77,16 +79,12 @@ export async function separateClothingItemsWithOpenAI(imageUri) {
   let articles = [];
   let rawText;
   try {
-    // Try to extract the actual text output from the OpenAI response
-    if (data.output && Array.isArray(data.output) && data.output.length > 0) {
-      const firstOutput = data.output[0];
-      if (__DEV__) console.log('[openaiVisionService] OpenAI output[0]:', firstOutput);
-      if (firstOutput.content && Array.isArray(firstOutput.content) && firstOutput.content.length > 0) {
-        // Find the first content object with a text field
-        const textContent = firstOutput.content.find(c => (c.type === 'output_text' || c.type === 'text') && c.text);
-        if (textContent) {
-          rawText = textContent.text;
-        }
+    // Try to extract the actual text output from the OpenAI Chat Completions response
+    if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
+      const firstChoice = data.choices[0];
+      if (__DEV__) console.log('[openaiVisionService] OpenAI choice[0]:', firstChoice);
+      if (firstChoice.message && firstChoice.message.content) {
+        rawText = firstChoice.message.content;
       }
     }
     if (!rawText) {

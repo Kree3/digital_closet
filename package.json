@@ -9,27 +9,27 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/stack": "^6.3.23",
-    "expo": "^52.0.46",
-    "expo-camera": "~16.0.18",
-    "expo-constants": "~15.0.0",
-    "expo-file-system": "~16.0.8",
-    "expo-image-manipulator": "~13.0.6",
-    "expo-image-picker": "^14.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-native": "0.73.0",
+    "expo": "53",
+    "expo-camera": "~16.1.10",
+    "expo-constants": "~17.1.7",
+    "expo-file-system": "~18.1.11",
+    "expo-image-manipulator": "~13.1.7",
+    "expo-image-picker": "~16.1.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.5",
     "react-native-dotenv": "^3.4.11",
-    "react-native-safe-area-context": "^5.4.0",
-    "react-native-screens": "^4.10.0",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
     "react-native-uuid": "^2.0.3"
   },
   "devDependencies": {
     "@testing-library/react-native": "^13.2.0",
-    "jest-expo": "^52.0.6",
-    "react-test-renderer": "^18.2.0"
+    "jest-expo": "~53.0.9",
+    "react-test-renderer": "^19.0.0"
   }
 }

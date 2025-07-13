@@ -129,7 +129,7 @@ export default function OutfitsScreen() {
   // Navigate to create a new outfit
   const navigateToCreateOutfit = () => {
     console.log('[OutfitsScreen] Navigating to create outfit');
-    navigation.navigate('Gallery', { selectMode: true });
+    navigation.navigate('Wardrobe', { selectMode: true });
   };
   
   // Render empty state when no outfits exist

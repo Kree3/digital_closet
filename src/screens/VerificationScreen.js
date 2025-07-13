@@ -14,8 +14,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { processImageForVerification, processSelectedArticles } from '../services/verificationService';
 
-// Optionally, import your OpenAI API key from env/config
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// Import OpenAI API key from environment variables
+import { OPENAI_API_KEY } from '@env';
 
 // Toggle this flag to enable/disable bounding box overlays
 const BOUNDING_BOX_OVERLAY_ENABLED = true;
@@ -78,8 +78,11 @@ export default function VerificationScreen({ route, navigation }) {
       return;
     }
     
-    // Navigate to Gallery with the processed articles
-    navigation.replace('Gallery', { newArticles: finalArticles });
+    // Navigate to Wardrobe tab with the processed articles
+    navigation.navigate('Wardrobe', { 
+      screen: 'WardrobeScreen',
+      params: { newArticles: finalArticles } 
+    });
     setLoading(false);
   };
 

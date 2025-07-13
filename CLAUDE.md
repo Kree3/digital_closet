@@ -181,3 +181,12 @@
    - Weather integration for contextual outfit suggestions
    - Social sharing capabilities
    - AR try-on functionality
+
+## 9. Future Improvements & Notes
+
+### **User Experience Improvements**
+- **Progressive article processing UI**: Currently when processing images with multiple clothing items, users see no feedback until ALL items are completely processed (detection + DALL-E generation + local storage). Should instead show items appearing one-by-one as they complete processing, with status indicators like "Analyzing image..." → "Found 3 items" → "Processing item 1/3..." → Item 1 appears → "Processing item 2/3..." → Item 2 appears, etc. This creates a sense of progress rather than a long silent wait.
+
+### **Navigation & Flow Issues**
+- **Fix outdated screen references**: Some components still reference old "Gallery" screen name instead of "Wardrobe" - needs systematic review
+- **OutfitsScreen render loop**: Component mounts repeatedly (5x) during navigation, possibly due to duplicate useEffect + useFocusEffect calling loadData()

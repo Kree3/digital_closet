@@ -1,5 +1,4 @@
 // garmentVisionService.js
-console.log('[garmentVisionService] TOP OF FILE loaded');
 // Service module for the GarmentVision pipeline: OpenAI-powered garment segmentation and retouching
 // Clean, modular, and testable. All business logic for image analysis and background cleanup lives here.
 //

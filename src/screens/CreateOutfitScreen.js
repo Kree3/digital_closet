@@ -45,7 +45,7 @@ export default function CreateOutfitScreen() {
         index: 0,
         routes: [
           { name: 'Home' },
-          { name: 'Gallery', params: { resetSelection: true } },
+          { name: 'Wardrobe', params: { resetSelection: true } },
           { name: 'Outfits' }
         ],
       });
@@ -115,7 +115,7 @@ export default function CreateOutfitScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.cancelButton}
-            onPress={() => navigation.navigate('Gallery', { resetSelection: true })}
+            onPress={() => navigation.navigate('Wardrobe', { resetSelection: true })}
           >
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
