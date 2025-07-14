@@ -14,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { processImageForVerification, processSelectedArticles } from '../services/verificationService';
 import { colors, shadows } from '../theme';
+import Button from '../components/common/Button';
 
 // Import OpenAI API key from environment variables
 import { OPENAI_API_KEY } from '@env';
@@ -112,11 +113,12 @@ export default function VerificationScreen({ route, navigation }) {
       {error && <Text style={{marginVertical: 12, color: colors.error}}>{error}</Text>}
       <View style={styles.selectAllBar}>
         <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
-        <TouchableOpacity onPress={selectedIds.length === articles.length ? deselectAll : selectAll} style={styles.selectAllButton}>
-          <Text style={styles.selectAllText}>
-            {selectedIds.length === articles.length ? 'Deselect All' : 'Select All'}
-          </Text>
-        </TouchableOpacity>
+        <Button
+          title={selectedIds.length === articles.length ? 'Deselect All' : 'Select All'}
+          onPress={selectedIds.length === articles.length ? deselectAll : selectAll}
+          variant="secondary"
+          size="small"
+        />
       </View>
       <FlatList
         data={articles}
@@ -154,13 +156,14 @@ export default function VerificationScreen({ route, navigation }) {
         }}
         contentContainerStyle={styles.grid}
       />
-      <TouchableOpacity
-        style={[styles.confirmButton, selectedIds.length === 0 && styles.confirmButtonDisabled]}
+      <Button
+        title={`Finish (${selectedIds.length})`}
         onPress={onFinish}
         disabled={selectedIds.length === 0}
-      >
-        <Text style={styles.confirmButtonText}>Finish ({selectedIds.length})</Text>
-      </TouchableOpacity>
+        loading={loading}
+        variant="primary"
+        style={styles.confirmButton}
+      />
     </View>
   );
 }
@@ -198,18 +201,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
   },
-  selectAllButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
-    backgroundColor: colors.borderMedium,
-    marginLeft: 16,
-  },
-  selectAllText: {
-    color: colors.iosBlue,
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
   selectedCount: {
     fontSize: 16,
     color: colors.gray700,
@@ -230,10 +221,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 16,
-  },
-  confirmButtonDisabled: {
-    backgroundColor: colors.primaryLight,
-    borderColor: colors.borderLight,
   },
   container: {
     flex: 1,

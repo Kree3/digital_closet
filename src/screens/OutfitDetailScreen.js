@@ -24,6 +24,7 @@ import { markOutfitAsWorn } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
 import { colors, shadows } from '../theme';
 import AppHeader from '../components/common/AppHeader';
+import Button from '../components/common/Button';
 
 export default function OutfitDetailScreen() {
   const navigation = useNavigation();
@@ -185,20 +186,16 @@ export default function OutfitDetailScreen() {
             }
           />
           
-          <TouchableOpacity 
-            style={styles.wearButton}
+          <Button
+            title="I Wore This Today"
             onPress={handleMarkAsWorn}
             disabled={markingAsWorn}
-          >
-            {markingAsWorn ? (
-              <ActivityIndicator size="small" color={colors.white} />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle" size={20} color={colors.white} style={styles.wearButtonIcon} />
-                <Text style={styles.wearButtonText}>I Wore This Today</Text>
-              </>
-            )}
-          </TouchableOpacity>
+            loading={markingAsWorn}
+            variant="primary"
+            icon="checkmark-circle"
+            iconPosition="left"
+            style={styles.wearButton}
+          />
         </>
       )}
     </SafeAreaView>
@@ -285,23 +282,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   wearButton: {
-    backgroundColor: colors.primary,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
     margin: 16,
-    ...shadows.small,
-  },
-  wearButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  wearButtonIcon: {
-    marginRight: 8,
   },
   loadingContainer: {
     flex: 1,

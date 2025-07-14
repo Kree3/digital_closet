@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { saveOutfit as saveOutfitService } from '../services/outfitService';
 import { colors, shadows } from '../theme';
+import Button from '../components/common/Button';
 
 
 export default function CreateOutfitScreen() {
@@ -95,31 +96,32 @@ export default function CreateOutfitScreen() {
             <View style={styles.articleCard}>
               {/* Support all possible image fields with priority on local images for persistence */}
 <Image source={{ uri: item.localImageUri || item.croppedImageUri || item.imageUri || item.imageUrl }} style={styles.articleImage} />
-              <TouchableOpacity
-                style={styles.removeButton}
+              <Button
+                variant="icon"
+                icon="close-circle"
                 onPress={() => removeArticle(item.id)}
                 accessibilityLabel={`Remove ${item.name || 'article'}`}
-              >
-                <Ionicons name="close-circle" size={28} color={colors.error} />
-              </TouchableOpacity>
+                style={styles.removeButton}
+              />
               <Text numberOfLines={1} style={styles.articleLabel}>{item.name}</Text>
             </View>
           )}
         />
         <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.saveButton, articles.length === 0 && styles.saveButtonDisabled]}
+          <Button
+            title="Save Outfit"
             onPress={saveOutfit}
-            disabled={saving || articles.length === 0}
-          >
-            <Text style={styles.saveButtonText}>Save Outfit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cancelButton}
+            disabled={articles.length === 0}
+            loading={saving}
+            variant="primary"
+            style={styles.saveButton}
+          />
+          <Button
+            title="Cancel"
             onPress={() => navigation.navigate('Wardrobe', { resetSelection: true })}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
+            variant="secondary"
+            style={styles.cancelButton}
+          />
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -203,10 +205,6 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     zIndex: 2,
-    backgroundColor: colors.white,
-    borderRadius: 14,
-    padding: 0,
-    ...shadows.small,
   },
   articleLabel: {
     fontSize: 15,
@@ -226,30 +224,9 @@ const styles = StyleSheet.create({
     marginBottom: 40, // Raised for comfortable touch per mobile UX standards
   },
   saveButton: {
-    backgroundColor: colors.primaryDark,
-    paddingVertical: 12,
-    paddingHorizontal: 28,
-    borderRadius: 10,
     marginRight: 12,
-    ...shadows.small,
-  },
-  saveButtonDisabled: {
-    backgroundColor: colors.textDisabled,
-  },
-  saveButtonText: {
-    color: colors.white,
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   cancelButton: {
-    backgroundColor: colors.gray200,
-    paddingVertical: 12,
-    paddingHorizontal: 22,
-    borderRadius: 10,
-  },
-  cancelButtonText: {
-    color: colors.textPrimary,
-    fontWeight: 'bold',
-    fontSize: 16,
+    // Keep for any additional styling if needed
   },
 });

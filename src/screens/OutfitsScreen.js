@@ -26,6 +26,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getOutfits, removeOutfit } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
 import AppHeader from '../components/common/AppHeader';
+import Button from '../components/common/Button';
 import { colors, shadows } from '../theme';
 
 export default function OutfitsScreen() {
@@ -154,12 +155,11 @@ export default function OutfitsScreen() {
         <Text style={styles.emptyText}>
           Create your first outfit by selecting items from your closet.
         </Text>
-        <TouchableOpacity 
-          style={styles.createButton}
+        <Button
+          title="Create Outfit"
           onPress={navigateToCreateOutfit}
-        >
-          <Text style={styles.createButtonText}>Create Outfit</Text>
-        </TouchableOpacity>
+          variant="primary"
+        />
       </View>
     );
   };
@@ -202,12 +202,12 @@ export default function OutfitsScreen() {
           <Text style={styles.outfitMeta}>{articleCount} items</Text>
         </View>
         
-        <TouchableOpacity 
-          style={styles.deleteButton}
+        <Button
+          variant="icon"
+          icon="trash-outline"
           onPress={() => handleDeleteOutfit(outfit)}
-        >
-          <Ionicons name="trash-outline" size={18} color={colors.error} />
-        </TouchableOpacity>
+          style={styles.deleteButton}
+        />
       </TouchableOpacity>
     );
   };
@@ -315,14 +315,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: colors.overlayLight,
-    borderRadius: 14,
-    padding: 8,
     zIndex: 2,
-    shadowColor: colors.shadowColor,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   emptyContainer: {
     flex: 1,
@@ -342,17 +335,5 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
-  },
-  createButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    elevation: 2,
-  },
-  createButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
