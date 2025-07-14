@@ -19,6 +19,11 @@
   - UI (View/Screen) components are presentation-only.
   - All business logic, storage, and data flow are in service modules.
   - Easy to swap out service implementations or UI frameworks.
+- **Component-Based Design System**
+  - **/src/theme/** – Centralized theme system (colors, spacing, typography, shadows)
+  - **/src/components/common/** – Reusable UI components (AppHeader, Button, EmptyState)
+  - **Consistent Props**: All components follow similar prop patterns for easy learning
+  - **Theme Integration**: All components use centralized theme system
 - **Modularity:** Each module has a single responsibility and clear interface.
 - **Testability:** All core logic is covered by Jest tests. New features require new tests.
 - **Scalability:** Architecture supports future features (filtering, sharing, etc.) without major rewrites.
@@ -117,70 +122,54 @@
 
 ## 8. Recent Changes & Development Roadmap
 
-### Recent Implementations (May 2025)
+### Recent Major Refactoring (July 2025)
 
-1. **Enhanced Navigation System**
-   - Implemented a bottom tab navigator with three main tabs: Home, Wardrobe (renamed from Gallery), and Outfits
-   - Added a floating action button (FAB) for primary actions with options for "Take a photo" and "Upload a photo"
-   - Integrated developer functionality (Clear Closet) into the FAB menu with a distinctive red button and bug icon
-   - Positioned the FAB button optimally within the navigation bar for easy access
-   - Increased the size of tab icons from 24px to 28px for better visibility
-   - Increased the size of the FAB button to 64px with a 34px icon for improved usability
+**Comprehensive Component Library & Theme System Implementation**
 
-2. **UI Standardization**
-   - Standardized header styles across all screens (Home, Wardrobe, Outfits) for consistent user experience
-   - Carefully adjusted header spacing to avoid overlap with iOS status bar while maintaining visual consistency
-   - Implemented proper padding and alignment for all UI elements
-   - Increased vertical spacing between FAB menu buttons for better touch targets
+1. **✅ Centralized Theme System** (`src/theme/`)
+   - **colors.js**: Consolidated 40+ hardcoded colors into semantic color system
+   - **spacing.js**: 8px grid spacing constants for consistency
+   - **typography.js**: Centralized text styles and font configurations
+   - **index.js**: Main theme export with shadow presets
+   - **Impact**: Eliminated 100+ hardcoded color values, enabled easy theme switching/dark mode
 
-3. **Previous Implementations**
-   - Image Persistence: Added local storage for images to solve URL expiration issues
-   - Outfit Management: Created a fully functional outfit management interface
-   - Wear Count Tracking: Added tracking for both article and outfit usage statistics
+2. **✅ AppHeader Component** (`src/components/common/AppHeader.js`)
+   - **Variants**: `main` (dashboard), `navigation` (back button), `simple`
+   - **Props**: title, showBackButton, rightElement, backgroundColor, showBorder
+   - **Replaced**: Headers in HomeScreen, GalleryScreen, OutfitsScreen, OutfitDetailScreen
+   - **Impact**: ~60 lines saved, consistent header behavior across app
 
-### Next Development Priorities
+3. **✅ Button Component** (`src/components/common/Button.js`) 
+   - **Variants**: primary, secondary, destructive, icon
+   - **Features**: Loading states, icon support, accessibility, theme integration
+   - **Replaced**: 8+ button patterns across VerificationScreen, CreateOutfitScreen, OutfitsScreen, OutfitDetailScreen
+   - **Impact**: ~150+ lines saved, standardized button behavior
 
-1. **UI Component Library & Standardization**
-   - Extract common UI elements (headers, cards, buttons) into reusable components
-   - Implement a centralized theme system with consistent styling constants
-   - Create a component documentation system for future development
-   - Standardize styling approaches across all screens
+4. **✅ EmptyState Component** (`src/components/common/EmptyState.js`)
+   - **Variants**: fullscreen, inline, card for different contexts
+   - **Features**: Loading states, error states, action buttons, flexible content
+   - **Replaced**: Empty states in OutfitsScreen, HomeScreen, OutfitDetailScreen
+   - **Impact**: ~100+ lines saved, consistent empty state UX
 
-2. **Category-Based Navigation Enhancement**
-   - Implement improved category filtering in the Wardrobe screen
-   - Add smooth transitions between category views
-   - Consider adding a dedicated category tab or dropdown for quick access
-   - Refactor navigation code to improve maintainability
+**Total Refactoring Impact**: ~310+ lines eliminated, consistent design system, easier maintenance
 
-3. **Usage Analytics Dashboard**
-   - Enhance the Home screen with more detailed usage analytics
-   - Create visualizations for wear statistics (e.g., charts, graphs)
-   - Add insights about most/least worn items and outfit combinations
-   - Implement proper data abstraction for analytics to improve testability
+### Current Development Priorities
 
-4. **Code Refactoring & Service Optimization**
-   - Break down large services into more focused modules
-   - Improve test coverage for critical business logic
-   - Update outdated dependencies to recommended versions
-   - Add comprehensive JSDoc comments to improve code documentation
+1. **🚀 HIGH PRIORITY: ArticleCard Component** (In Progress)
+   - **Target**: Extract article display patterns from CategoryCarousel, CreateOutfitScreen, VerificationScreen, OutfitDetailScreen
+   - **Expected Impact**: ~200+ lines saved (biggest remaining win)
+   - **Features**: Multiple layout variants, selection states, action buttons, image fallbacks
 
-5. **Search and Filter Functionality**
-   - Implement robust search across the wardrobe
-   - Add advanced filtering options (by color, type, season, etc.)
-   - Create saved filter presets for quick access
-   - Design the filter system for extensibility and reuse
+2. **Code Quality Improvements**
+   - **Fix Large Functions**: Break down `galleryService.addArticles` (57 lines), `garmentVisionService.processGarmentImage` (56 lines)
+   - **Standardize Error Handling**: Create consistent error patterns across services (~100+ lines saved)
+   - **Expand Test Coverage**: Currently only 37% of services have tests
 
-6. **Performance Optimizations**
-   - Implement lazy loading for image-heavy screens
-   - Optimize storage and retrieval of article data
-   - Add caching mechanisms for frequently accessed data
-   - Reduce redundant code in image processing pipeline
-
-7. **Future Enhancements**
-   - Outfit recommendation engine based on wear patterns and preferences
-   - Weather integration for contextual outfit suggestions
-   - Social sharing capabilities
-   - AR try-on functionality
+3. **Future Enhancements**
+   - **Progressive Article Processing UI**: Show real-time processing feedback instead of silent waiting
+   - **Category-Based Navigation**: Enhanced filtering and transitions
+   - **Usage Analytics Dashboard**: Visualizations and insights
+   - **Search and Filter Functionality**: Robust search across wardrobe
 
 ## 9. Future Improvements & Notes
 
