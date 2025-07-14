@@ -23,6 +23,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { markOutfitAsWorn } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
 import { colors, shadows } from '../theme';
+import AppHeader from '../components/common/AppHeader';
 
 export default function OutfitDetailScreen() {
   const navigation = useNavigation();
@@ -142,16 +143,12 @@ export default function OutfitDetailScreen() {
   
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>{outfitDetails.name}</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <AppHeader 
+        title={outfitDetails.name}
+        showBackButton={true}
+        variant="navigation"
+        showBorder={true}
+      />
       
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
@@ -212,28 +209,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-  },
-  backButton: {
-    padding: 8,
-  },
-  placeholder: {
-    width: 40,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-    flex: 1,
-    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',

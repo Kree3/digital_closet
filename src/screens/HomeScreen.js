@@ -13,6 +13,7 @@ import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows } from '../theme';
+import AppHeader from '../components/common/AppHeader';
 
 export default function HomeScreen({ navigation }) {
   // We'll keep the media functions for reference, but they'll be called from the FAB now
@@ -20,9 +21,11 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Digital Closet</Text>
-      </View>
+      <AppHeader 
+        title="Digital Closet"
+        variant="main"
+        backgroundColor={colors.backgroundPrimary}
+      />
       
       <View style={styles.statsContainer}>
         <Text style={styles.sectionTitle}>Your Stats</Text>
@@ -66,20 +69,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.backgroundPrimary,
     paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingTop: 65,  // Fine-tuned top padding for perfect positioning
-    paddingBottom: 16,
-    marginLeft: 4,  // Slight adjustment to align with other content
-    backgroundColor: colors.backgroundPrimary,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
   },
   sectionTitle: {
     fontSize: 18,

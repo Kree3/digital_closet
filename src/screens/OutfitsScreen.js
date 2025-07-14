@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getOutfits, removeOutfit } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
+import AppHeader from '../components/common/AppHeader';
 import { colors, shadows } from '../theme';
 
 export default function OutfitsScreen() {
@@ -213,9 +214,10 @@ export default function OutfitsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Outfits</Text>
-      </View>
+      <AppHeader 
+        title="My Outfits"
+        variant="main"
+      />
       
       <FlatList
         data={outfits}
@@ -236,20 +238,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     paddingTop: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    backgroundColor: colors.white,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
   },
   addButton: {
     backgroundColor: colors.primary,

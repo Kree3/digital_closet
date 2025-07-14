@@ -17,6 +17,7 @@ import { getAllArticles, addArticles, deleteArticlesById, clearAllArticles } fro
 import CategoryCarousel from '../components/CategoryCarousel';
 import { Alert } from 'react-native';
 import { colors, shadows } from '../theme';
+import AppHeader from '../components/common/AppHeader';
 
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -128,9 +129,10 @@ export default function GalleryScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>My Wardrobe</Text>
-      </View>
+      <AppHeader 
+        title="My Wardrobe"
+        variant="main"
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {categories.map((cat) =>
@@ -237,15 +239,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     paddingTop: 20,
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,  // Increased top padding to match OutfitsScreen
-    paddingBottom: 16,
-    backgroundColor: colors.white,
-  },
   homeIconButton: {
     padding: 4,
     marginLeft: 12,
@@ -257,11 +250,6 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
   },
   selectAllBar: {
     flexDirection: 'row',
