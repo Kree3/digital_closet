@@ -13,12 +13,12 @@
 // Designed for clarity, maintainability, and a delightful user experience.
 
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, FlatList, Image, TouchableOpacity, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { saveOutfit as saveOutfitService } from '../services/outfitService';
 import { colors, shadows } from '../theme';
 import Button from '../components/common/Button';
+import ArticleCard from '../components/common/ArticleCard';
 
 
 export default function CreateOutfitScreen() {
@@ -93,18 +93,13 @@ export default function CreateOutfitScreen() {
           contentContainerStyle={styles.articleGrid}
           columnWrapperStyle={styles.articleRow}
           renderItem={({ item }) => (
-            <View style={styles.articleCard}>
-              {/* Support all possible image fields with priority on local images for persistence */}
-<Image source={{ uri: item.localImageUri || item.croppedImageUri || item.imageUri || item.imageUrl }} style={styles.articleImage} />
-              <Button
-                variant="icon"
-                icon="close-circle"
-                onPress={() => removeArticle(item.id)}
-                accessibilityLabel={`Remove ${item.name || 'article'}`}
-                style={styles.removeButton}
-              />
-              <Text numberOfLines={1} style={styles.articleLabel}>{item.name}</Text>
-            </View>
+            <ArticleCard
+              article={item}
+              variant="grid"
+              showName={true}
+              onRemove={removeArticle}
+              style={styles.articleCard}
+            />
           )}
         />
         <View style={styles.buttonRow}>
@@ -190,29 +185,6 @@ const styles = StyleSheet.create({
     padding: 10,
     ...shadows.small,
     position: 'relative',
-  },
-  articleImage: {
-    width: '100%',
-    height: undefined,
-    aspectRatio: 1,
-    borderRadius: 10,
-    marginBottom: 8,
-    backgroundColor: colors.borderMedium,
-    resizeMode: 'cover',
-  },
-  removeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 2,
-  },
-  articleLabel: {
-    fontSize: 15,
-    color: colors.textBlack,
-    marginTop: 6,
-    textAlign: 'center',
-    fontWeight: '500',
-    maxWidth: '95%',
   },
   input: {
     // removed, replaced by fitNameInput

@@ -12,13 +12,9 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Image,
-  TouchableOpacity,
   Alert,
-  ActivityIndicator,
   SafeAreaView
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { markOutfitAsWorn } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
@@ -26,6 +22,7 @@ import { colors, shadows } from '../theme';
 import AppHeader from '../components/common/AppHeader';
 import Button from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
+import ArticleCard from '../components/common/ArticleCard';
 
 export default function OutfitDetailScreen() {
   const navigation = useNavigation();
@@ -94,24 +91,14 @@ export default function OutfitDetailScreen() {
   
   // Render an individual article
   const renderArticle = ({ item }) => {
-    const imageUri = item.localImageUri || item.croppedImageUri || item.imageUri || item.imageUrl;
-    const wearCount = typeof item.wearCount === 'number' ? item.wearCount : 0;
-    
     return (
-      <View style={styles.articleCard}>
-        <Image 
-          source={{ uri: imageUri }}
-          style={styles.articleImage}
-        />
-        <View style={styles.articleInfo}>
-          <Text style={styles.articleName}>{item.description || item.name || 'Article'}</Text>
-          <Text style={styles.articleCategory}>{item.category || 'Uncategorized'}</Text>
-          <View style={styles.wearCountContainer}>
-            <Ionicons name="repeat" size={16} color={colors.textSecondary} />
-            <Text style={styles.wearCountText}>Worn {wearCount} time{wearCount !== 1 ? 's' : ''}</Text>
-          </View>
-        </View>
-      </View>
+      <ArticleCard
+        article={item}
+        variant="list"
+        showName={true}
+        showCategory={true}
+        showWearCount={true}
+      />
     );
   };
   
@@ -240,48 +227,6 @@ const styles = StyleSheet.create({
   },
   articlesList: {
     padding: 16,
-  },
-  articleCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    marginBottom: 16,
-    padding: 12,
-    ...shadows.small,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  articleImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: colors.backgroundLight,
-  },
-  articleInfo: {
-    flex: 1,
-    marginLeft: 16,
-    justifyContent: 'center',
-  },
-  articleName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: 4,
-  },
-  articleCategory: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 8,
-    textTransform: 'capitalize',
-  },
-  wearCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  wearCountText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginLeft: 6,
   },
   wearButton: {
     margin: 16,

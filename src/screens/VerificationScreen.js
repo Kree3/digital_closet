@@ -11,10 +11,11 @@
 //
 // Designed for flexibility and robust user experience.
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { processImageForVerification, processSelectedArticles } from '../services/verificationService';
 import { colors, shadows } from '../theme';
 import Button from '../components/common/Button';
+import ArticleCard from '../components/common/ArticleCard';
 
 // Import OpenAI API key from environment variables
 import { OPENAI_API_KEY } from '@env';
@@ -127,31 +128,16 @@ export default function VerificationScreen({ route, navigation }) {
         renderItem={({ item }) => {
           const selected = selectedIds.includes(item.id);
           return (
-            <TouchableOpacity
+            <ArticleCard
+              article={item}
+              variant="verification"
+              showName={true}
+              showConfidence={true}
+              selectionMode={true}
+              selected={selected}
+              onSelect={toggleSelect}
               style={[styles.card, selected && styles.selectedCard]}
-              onPress={() => toggleSelect(item.id)}
-              activeOpacity={0.8}
-            >
-              {/* Garment image or placeholder logic - prioritize local images for persistence */}
-              {item.localImageUri || item.imageUrl ? (
-                <Image
-                  source={{ uri: item.localImageUri || item.imageUrl }}
-                  style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: colors.backgroundMuted }}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: colors.backgroundMuted, alignItems: 'center', justifyContent: 'center' }}>
-                  {/* Use a built-in icon or a simple SVG/emoji as a placeholder */}
-                  <Text style={{ fontSize: 36, color: colors.gray400 }}>🧦</Text>
-                  <Text style={{ color: colors.gray400, fontSize: 13, marginTop: 4 }}>Image not available for this item.</Text>
-                </View>
-              )}
-              <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>{item.name}</Text>
-              {/* Optionally show confidence if present */}
-              {typeof item.confidence === 'number' && (
-                <Text style={{ color: colors.gray500, marginBottom: 4 }}>{(item.confidence * 100).toFixed(1)}%</Text>
-              )}
-            </TouchableOpacity>
+            />
           );
         }}
         contentContainerStyle={styles.grid}
