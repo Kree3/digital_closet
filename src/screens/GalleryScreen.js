@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getAllArticles, addArticles, deleteArticlesById, clearAllArticles } from '../services/galleryService';
 import CategoryCarousel from '../components/CategoryCarousel';
 import { Alert } from 'react-native';
+import { colors, shadows } from '../theme';
 
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -155,7 +156,7 @@ export default function GalleryScreen({ navigation, route }) {
             accessibilityLabel="Deselect all selected articles"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close-circle-outline" size={22} color="#888" />
+            <Ionicons name="close-circle-outline" size={22} color={colors.gray500} />
           </TouchableOpacity>
           {/* Colored number for selected count */}
           <Text
@@ -175,7 +176,7 @@ export default function GalleryScreen({ navigation, route }) {
             }}
             accessibilityLabel="Create Fit from selected articles"
           >
-            <Ionicons name="add-circle" size={24} color="#42a5f5" style={{ marginRight: 6 }} />
+            <Ionicons name="add-circle" size={24} color={colors.primary} style={{ marginRight: 6 }} />
             <Text style={styles.createFitText}>Create Fit</Text>
           </TouchableOpacity>
 
@@ -186,7 +187,7 @@ export default function GalleryScreen({ navigation, route }) {
             disabled={selectedIds.length === 0}
             accessibilityLabel="Delete selected articles"
           >
-            <Ionicons name="trash" size={22} color="#fff" />
+            <Ionicons name="trash" size={22} color={colors.white} />
           </TouchableOpacity>
         </View>
       )}
@@ -196,19 +197,19 @@ export default function GalleryScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   clearButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: colors.errorAlt,
     padding: 10,
     borderRadius: 6,
     marginBottom: 10,
     alignItems: 'center',
   },
   clearButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   placeholderContainer: {
-    backgroundColor: '#eee',
+    backgroundColor: colors.gray200,
     justifyContent: 'center',
     alignItems: 'center',
     height: 120,
@@ -217,23 +218,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   placeholderText: {
-    color: '#888',
+    color: colors.gray500,
     marginBottom: 8,
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: colors.secondary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 5,
   },
   retryButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     paddingTop: 20,
   },
   headerRow: {
@@ -243,14 +244,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,  // Increased top padding to match OutfitsScreen
     paddingBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   homeIconButton: {
     padding: 4,
     marginLeft: 12,
   },
   debugIconButton: {
-    backgroundColor: '#f44336',
+    backgroundColor: colors.error,
     borderRadius: 20,
     padding: 4,
     marginLeft: 12,
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   selectAllBar: {
     flexDirection: 'row',
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     // Removed, replaced by colored number
   },
   selectedCountNumber: {
-    color: '#1976d2',
+    color: colors.primaryDark,
     fontWeight: 'bold',
     fontSize: 18,
     marginRight: 12,
@@ -290,28 +291,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: colors.backgroundTertiary,
     marginRight: 10,
   },
   selectAllText: {
     fontSize: 14,
-    color: '#222',
+    color: colors.textBlack,
     fontWeight: '500',
   },
   deleteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f44336',
+    backgroundColor: colors.error,
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 8,
     marginLeft: 10,
   },
   deleteButtonDisabled: {
-    backgroundColor: '#ddd',
+    backgroundColor: colors.borderDark,
   },
   deleteButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 15,
     marginLeft: 6,
@@ -327,21 +328,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 18,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 8,
-    elevation: 6,
+    ...shadows.medium,
     zIndex: 100,
   },
   createFitButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e3f2fd',
+    backgroundColor: colors.primaryBackground,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -349,7 +346,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   createFitText: {
-    color: '#1976d2',
+    color: colors.primaryDark,
     fontWeight: 'bold',
     fontSize: 15,
   },

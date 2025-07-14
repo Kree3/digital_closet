@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getOutfits, removeOutfit } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
+import { colors, shadows } from '../theme';
 
 export default function OutfitsScreen() {
   console.log('[OutfitsScreen] Component mounted');
@@ -139,7 +140,7 @@ export default function OutfitsScreen() {
     if (loading) {
       return (
         <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color="#42a5f5" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.emptyText}>Loading outfits...</Text>
         </View>
       );
@@ -147,7 +148,7 @@ export default function OutfitsScreen() {
     
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="shirt-outline" size={64} color="#b0bec5" />
+        <Ionicons name="shirt-outline" size={64} color={colors.textDisabled} />
         <Text style={styles.emptyTitle}>No Outfits Yet</Text>
         <Text style={styles.emptyText}>
           Create your first outfit by selecting items from your closet.
@@ -190,7 +191,7 @@ export default function OutfitsScreen() {
             ))
           ) : (
             <View style={styles.noPreviewContainer}>
-              <Ionicons name="images-outline" size={32} color="#b0bec5" />
+              <Ionicons name="images-outline" size={32} color={colors.textDisabled} />
             </View>
           )}
         </View>
@@ -204,7 +205,7 @@ export default function OutfitsScreen() {
           style={styles.deleteButton}
           onPress={() => handleDeleteOutfit(outfit)}
         >
-          <Ionicons name="trash-outline" size={18} color="#f44336" />
+          <Ionicons name="trash-outline" size={18} color={colors.error} />
         </TouchableOpacity>
       </TouchableOpacity>
     );
@@ -233,7 +234,7 @@ export default function OutfitsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     paddingTop: 20,
   },
   header: {
@@ -243,15 +244,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   addButton: {
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -263,18 +264,14 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   outfitCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 16,
     marginBottom: 20,
     padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    ...shadows.small,
     position: 'relative',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: colors.borderSubtle,
   },
   previewGrid: {
     flexDirection: 'row',
@@ -282,9 +279,9 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.gray100,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: colors.borderSubtle,
   },
   previewImage: {
     width: '50%',
@@ -304,7 +301,7 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.gray100,
   },
   outfitInfo: {
     marginTop: 16,
@@ -316,13 +313,13 @@ const styles = StyleSheet.create({
   outfitName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
     letterSpacing: 0.2,
   },
   outfitMeta: {
     fontSize: 14,
-    color: '#757575',
+    color: colors.textSecondary,
     marginLeft: 12,
     fontWeight: '500',
   },
@@ -330,11 +327,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: colors.overlayLight,
     borderRadius: 14,
     padding: 8,
     zIndex: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -350,23 +347,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 16,
     marginBottom: 8,
-    color: '#424242',
+    color: colors.gray800,
   },
   emptyText: {
     fontSize: 16,
-    color: '#757575',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },
   createButton: {
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
     elevation: 2,
   },
   createButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },

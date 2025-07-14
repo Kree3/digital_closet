@@ -17,6 +17,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
+import { colors, shadows } from '../theme';
 
 // Enable screens for better performance
 enableScreens();
@@ -125,19 +126,19 @@ function FabMenu({ navigation, onClose }) {
             );
           }}
         >
-          <Ionicons name="bug" size={32} color="#fff" />
+          <Ionicons name="bug" size={32} color={colors.white} />
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.fabMenuButton}
           onPress={pickImage}
         >
-          <Ionicons name="image" size={32} color="#fff" />
+          <Ionicons name="image" size={32} color={colors.white} />
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.fabMenuButton, styles.fabMenuButtonBottom]}
           onPress={takePhoto}
         >
-          <Ionicons name="camera" size={32} color="#fff" />
+          <Ionicons name="camera" size={32} color={colors.white} />
         </TouchableOpacity>
       </View>
     </View>
@@ -171,7 +172,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
                 onPress={() => setFabOpen(!fabOpen)}
               >
                 <View style={styles.fab}>
-                  <Ionicons name="add" size={34} color="#fff" />
+                  <Ionicons name="add" size={34} color={colors.white} />
                 </View>
               </TouchableOpacity>
             );
@@ -202,7 +203,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
               <Ionicons
                 name={options.tabBarIconName}
                 size={28}
-                color={isFocused ? '#42a5f5' : '#8e8e93'}
+                color={isFocused ? colors.primary : colors.tabInactive}
               />
             </TouchableOpacity>
           );
@@ -323,14 +324,12 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     height: 80,
     paddingBottom: 25,
     paddingTop: 10,
-    shadowColor: '#000',
+    ...shadows.medium,
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 10,
     position: 'relative',
   },
@@ -351,14 +350,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+    ...shadows.fab,
     bottom: 28,
   },
 
@@ -368,7 +363,7 @@ const styles = StyleSheet.create({
   },
   fabMenuOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlayDark,
   },
   fabMenuButtonsContainer: {
     position: 'absolute',
@@ -382,21 +377,17 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 8,
+    ...shadows.large,
     marginBottom: 40,
   },
   fabMenuButtonBottom: {
     marginBottom: 0,
   },
   fabMenuButtonDanger: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: colors.errorAlt,
     marginTop: 40,
   },
 });

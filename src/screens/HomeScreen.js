@@ -12,6 +12,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, shadows } from '../theme';
 
 export default function HomeScreen({ navigation }) {
   // We'll keep the media functions for reference, but they'll be called from the FAB now
@@ -44,7 +45,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.recentContainer}>
         <Text style={styles.sectionTitle}>Recent Activity</Text>
         <View style={styles.emptyState}>
-          <Ionicons name="time-outline" size={48} color="#b0bec5" />
+          <Ionicons name="time-outline" size={48} color={colors.textDisabled} />
           <Text style={styles.emptyStateText}>Your recent activity will appear here</Text>
         </View>
       </View>
@@ -52,7 +53,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.tipsContainer}>
         <Text style={styles.sectionTitle}>Tips</Text>
         <View style={styles.tipCard}>
-          <Ionicons name="bulb-outline" size={24} color="#42a5f5" style={styles.tipIcon} />
+          <Ionicons name="bulb-outline" size={24} color={colors.primary} style={styles.tipIcon} />
           <Text style={styles.tipText}>Use the + button to add new items to your wardrobe</Text>
         </View>
       </View>
@@ -63,7 +64,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.backgroundPrimary,
     paddingHorizontal: 16,
   },
   header: {
@@ -73,18 +74,18 @@ const styles = StyleSheet.create({
     paddingTop: 65,  // Fine-tuned top padding for perfect positioning
     paddingBottom: 16,
     marginLeft: 4,  // Slight adjustment to align with other content
-    backgroundColor: '#fff',
+    backgroundColor: colors.backgroundPrimary,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 12,
-    color: '#333',
+    color: colors.textPrimary,
   },
   statsContainer: {
     marginTop: 20,
@@ -94,25 +95,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.backgroundLight,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     width: '30%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadows.small,
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#42a5f5',
+    color: colors.primary,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textLight,
     marginTop: 4,
   },
   recentContainer: {
@@ -121,13 +118,13 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.backgroundLight,
     borderRadius: 12,
     padding: 30,
     marginVertical: 10,
   },
   emptyStateText: {
-    color: '#666',
+    color: colors.textLight,
     marginTop: 12,
     textAlign: 'center',
   },
@@ -137,7 +134,7 @@ const styles = StyleSheet.create({
   tipCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e3f2fd',
+    backgroundColor: colors.primaryBackground,
     borderRadius: 12,
     padding: 16,
     marginVertical: 8,
@@ -146,7 +143,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   tipText: {
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
 });

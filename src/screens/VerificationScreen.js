@@ -13,6 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { processImageForVerification, processSelectedArticles } from '../services/verificationService';
+import { colors, shadows } from '../theme';
 
 // Import OpenAI API key from environment variables
 import { OPENAI_API_KEY } from '@env';
@@ -107,8 +108,8 @@ export default function VerificationScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select Items to Confirm</Text>
-      {loading && <Text style={{marginVertical: 12, color: '#42a5f5'}}>Processing image...</Text>}
-      {error && <Text style={{marginVertical: 12, color: 'red'}}>{error}</Text>}
+      {loading && <Text style={{marginVertical: 12, color: colors.primary}}>Processing image...</Text>}
+      {error && <Text style={{marginVertical: 12, color: colors.error}}>{error}</Text>}
       <View style={styles.selectAllBar}>
         <Text style={styles.selectedCount}>{selectedIds.length} selected</Text>
         <TouchableOpacity onPress={selectedIds.length === articles.length ? deselectAll : selectAll} style={styles.selectAllButton}>
@@ -133,20 +134,20 @@ export default function VerificationScreen({ route, navigation }) {
               {item.localImageUri || item.imageUrl ? (
                 <Image
                   source={{ uri: item.localImageUri || item.imageUrl }}
-                  style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: '#f1f1f1' }}
+                  style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: colors.backgroundMuted }}
                   resizeMode="cover"
                 />
               ) : (
-                <View style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: '#f1f1f1', alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ width: '100%', aspectRatio: 1, borderRadius: 8, marginBottom: 8, backgroundColor: colors.backgroundMuted, alignItems: 'center', justifyContent: 'center' }}>
                   {/* Use a built-in icon or a simple SVG/emoji as a placeholder */}
-                  <Text style={{ fontSize: 36, color: '#bbb' }}>🧦</Text>
-                  <Text style={{ color: '#bbb', fontSize: 13, marginTop: 4 }}>Image not available for this item.</Text>
+                  <Text style={{ fontSize: 36, color: colors.gray400 }}>🧦</Text>
+                  <Text style={{ color: colors.gray400, fontSize: 13, marginTop: 4 }}>Image not available for this item.</Text>
                 </View>
               )}
               <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>{item.name}</Text>
               {/* Optionally show confidence if present */}
               {typeof item.confidence === 'number' && (
-                <Text style={{ color: '#888', marginBottom: 4 }}>{(item.confidence * 100).toFixed(1)}%</Text>
+                <Text style={{ color: colors.gray500, marginBottom: 4 }}>{(item.confidence * 100).toFixed(1)}%</Text>
               )}
             </TouchableOpacity>
           );
@@ -181,9 +182,9 @@ function BoundingBoxOverlay({ boundingBox }) {
         width: `${(right_col - left_col) * 100}%`,
         height: `${(bottom_row - top_row) * 100}%`,
         borderWidth: 2,
-        borderColor: '#42a5f5',
+        borderColor: colors.primary,
         borderRadius: 4,
-        backgroundColor: 'rgba(66, 165, 245, 0.08)',
+        backgroundColor: colors.primaryAlpha,
       }}
     />
   );
@@ -201,17 +202,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 18,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.borderMedium,
     marginLeft: 16,
   },
   selectAllText: {
-    color: '#007AFF',
+    color: colors.iosBlue,
     fontWeight: 'bold',
     fontSize: 15,
   },
   selectedCount: {
     fontSize: 16,
-    color: '#555',
+    color: colors.gray700,
     marginRight: 8,
   },
   confirmButton: {
@@ -219,56 +220,48 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     bottom: 48,
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     borderRadius: 24,
     paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: '#42a5f5',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadows.medium,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: colors.white,
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 16,
   },
   confirmButtonDisabled: {
-    backgroundColor: '#bbdefb',
-    borderColor: '#f0f0f0',
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.borderLight,
   },
   container: {
     flex: 1,
     alignItems: 'center',
     paddingTop: 40,
-    backgroundColor: '#f6f8fa',
+    backgroundColor: colors.backgroundCard,
   },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#22223b',
+    color: colors.textDark,
   },
   card: {
     margin: 10,
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    ...shadows.medium,
     padding: 12,
     width: 150,
     minHeight: 200,
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: 'transparent',
+    borderColor: colors.transparent,
   },
   selectedCard: {
-    borderColor: '#42a5f5', // Match Finish button
+    borderColor: colors.primary, // Match Finish button
   },
   image: {
     width: 120,
@@ -276,7 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.borderMedium,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -286,7 +279,7 @@ const styles = StyleSheet.create({
   discardButtonWrapper: {
     borderRadius: 8,
     overflow: 'hidden',
-    shadowColor: '#d11a2a',
+    shadowColor: colors.errorDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.16,
     shadowRadius: 4,

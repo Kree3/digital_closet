@@ -17,6 +17,7 @@ import { View, Text, TextInput, FlatList, Image, TouchableOpacity, StyleSheet, A
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { saveOutfit as saveOutfitService } from '../services/outfitService';
+import { colors, shadows } from '../theme';
 
 
 export default function CreateOutfitScreen() {
@@ -72,7 +73,7 @@ export default function CreateOutfitScreen() {
               maxLength={30}
               autoCorrect={false}
               autoCapitalize="words"
-              placeholderTextColor="#b0bec5"
+              placeholderTextColor={colors.textDisabled}
               textAlign={name.length === 0 ? 'center' : 'left'}
               accessibilityLabel="Outfit name input"
               onFocus={() => {
@@ -99,7 +100,7 @@ export default function CreateOutfitScreen() {
                 onPress={() => removeArticle(item.id)}
                 accessibilityLabel={`Remove ${item.name || 'article'}`}
               >
-                <Ionicons name="close-circle" size={28} color="#f44336" />
+                <Ionicons name="close-circle" size={28} color={colors.error} />
               </TouchableOpacity>
               <Text numberOfLines={1} style={styles.articleLabel}>{item.name}</Text>
             </View>
@@ -128,7 +129,7 @@ export default function CreateOutfitScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 24,
     alignItems: 'center',
   },
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     paddingTop: 72,
     paddingHorizontal: 20,
     marginBottom: 24,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     maxWidth: 400,
   },
   inputContainer: {
@@ -151,16 +152,16 @@ const styles = StyleSheet.create({
     height: 44,
     alignSelf: 'center',
     borderWidth: 1.5,
-    borderColor: '#e3f2fd',
+    borderColor: colors.primaryBackground,
     borderRadius: 12,
-    backgroundColor: '#f5faff',
+    backgroundColor: colors.backgroundSubtle,
     justifyContent: 'center',
   },
   fitNameInput: {
     flex: 1,
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: colors.primaryDark,
     paddingLeft: 18,
     paddingRight: 10,
     textAlign: 'left',
@@ -182,10 +183,10 @@ const styles = StyleSheet.create({
     width: (Dimensions.get('window').width - 24 * 2 - 24) / 2, // 24 padding on each side, 24 gap between
     margin: 8,
     alignItems: 'center',
-    backgroundColor: '#f7f7f7',
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 14,
     padding: 10,
-    elevation: 2,
+    ...shadows.small,
     position: 'relative',
   },
   articleImage: {
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 10,
     marginBottom: 8,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.borderMedium,
     resizeMode: 'cover',
   },
   removeButton: {
@@ -202,14 +203,14 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     zIndex: 2,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 14,
     padding: 0,
-    elevation: 2,
+    ...shadows.small,
   },
   articleLabel: {
     fontSize: 15,
-    color: '#222',
+    color: colors.textBlack,
     marginTop: 6,
     textAlign: 'center',
     fontWeight: '500',
@@ -225,29 +226,29 @@ const styles = StyleSheet.create({
     marginBottom: 40, // Raised for comfortable touch per mobile UX standards
   },
   saveButton: {
-    backgroundColor: '#1976d2',
+    backgroundColor: colors.primaryDark,
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 10,
     marginRight: 12,
-    elevation: 2,
+    ...shadows.small,
   },
   saveButtonDisabled: {
-    backgroundColor: '#b0bec5',
+    backgroundColor: colors.textDisabled,
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   cancelButton: {
-    backgroundColor: '#eee',
+    backgroundColor: colors.gray200,
     paddingVertical: 12,
     paddingHorizontal: 22,
     borderRadius: 10,
   },
   cancelButtonText: {
-    color: '#333',
+    color: colors.textPrimary,
     fontWeight: 'bold',
     fontSize: 16,
   },

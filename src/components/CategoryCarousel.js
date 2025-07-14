@@ -5,6 +5,7 @@ import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react
 
 import { Ionicons } from '@expo/vector-icons';
 import { validateImageUrl } from '../services/urlValidationService';
+import { colors } from '../theme';
 
 export default function CategoryCarousel({ category, articles, onItemPress, selectionMode = false, selectedIds = [] }) {
   // Function to check if an article's image URL is expired
@@ -47,12 +48,12 @@ export default function CategoryCarousel({ category, articles, onItemPress, sele
                 <View style={styles.expiredImageContainer}>
                   {imageStatus.expired ? (
                     <>
-                      <Ionicons name="refresh-circle" size={32} color="#42a5f5" />
+                      <Ionicons name="refresh-circle" size={32} color={colors.primary} />
                       <Text style={styles.expiredText}>Refresh Needed</Text>
                     </>
                   ) : (
                     <>
-                      <Ionicons name="image-outline" size={32} color="#888" />
+                      <Ionicons name="image-outline" size={32} color={colors.gray500} />
                       <Text style={styles.expiredText}>No Image</Text>
                     </>
                   )}
@@ -62,7 +63,7 @@ export default function CategoryCarousel({ category, articles, onItemPress, sele
               {selected && (
                 <View style={[styles.selectionOverlay, styles.selectedOverlay]}>
                   <View style={styles.checkmarkCircle}>
-                    <Ionicons name="checkmark" size={20} color="#fff" />
+                    <Ionicons name="checkmark" size={20} color={colors.white} />
                   </View>
                 </View>
               )}
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 16,
     marginBottom: 6,
-    color: '#222',
+    color: colors.textBlack,
   },
   carousel: {
     paddingHorizontal: 8,
@@ -94,12 +95,12 @@ const styles = StyleSheet.create({
     height: 160,
     marginHorizontal: 8,
     borderRadius: 12,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: colors.backgroundTertiary,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderWidth: 3,
-    borderColor: '#42a5f5',
+    borderColor: colors.primary,
   },
   selectionOverlay: {
     position: 'absolute',
@@ -115,23 +116,23 @@ const styles = StyleSheet.create({
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(66, 165, 245, 0.13)',
+    backgroundColor: colors.primaryAlpha,
     borderRadius: 12,
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
     padding: 7,
   },
   selectedOverlay: {
-    backgroundColor: 'rgba(66, 165, 245, 0.23)',
+    backgroundColor: colors.primaryAlpha23,
   },
   checkmarkCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.17,
     shadowRadius: 2,
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
     width: 110,
     height: 150,
     borderRadius: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 12,
     textAlign: 'center',
-    color: '#555',
+    color: colors.gray700,
     fontWeight: '500',
   },
 });

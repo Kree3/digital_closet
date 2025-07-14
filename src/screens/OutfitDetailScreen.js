@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { markOutfitAsWorn } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
+import { colors, shadows } from '../theme';
 
 export default function OutfitDetailScreen() {
   const navigation = useNavigation();
@@ -103,7 +104,7 @@ export default function OutfitDetailScreen() {
           <Text style={styles.articleName}>{item.description || item.name || 'Article'}</Text>
           <Text style={styles.articleCategory}>{item.category || 'Uncategorized'}</Text>
           <View style={styles.wearCountContainer}>
-            <Ionicons name="repeat" size={16} color="#757575" />
+            <Ionicons name="repeat" size={16} color={colors.textSecondary} />
             <Text style={styles.wearCountText}>Worn {wearCount} time{wearCount !== 1 ? 's' : ''}</Text>
           </View>
         </View>
@@ -146,7 +147,7 @@ export default function OutfitDetailScreen() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#42a5f5" />
+          <Ionicons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>{outfitDetails.name}</Text>
         <View style={styles.placeholder} />
@@ -169,7 +170,7 @@ export default function OutfitDetailScreen() {
       
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#42a5f5" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Loading articles...</Text>
         </View>
       ) : (
@@ -193,10 +194,10 @@ export default function OutfitDetailScreen() {
             disabled={markingAsWorn}
           >
             {markingAsWorn ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
-                <Ionicons name="checkmark-circle" size={20} color="#fff" style={styles.wearButtonIcon} />
+                <Ionicons name="checkmark-circle" size={20} color={colors.white} style={styles.wearButtonIcon} />
                 <Text style={styles.wearButtonText}>I Wore This Today</Text>
               </>
             )}
@@ -210,7 +211,7 @@ export default function OutfitDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   header: {
     flexDirection: 'row',
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.borderLight,
   },
   backButton: {
     padding: 8,
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
     textAlign: 'center',
   },
@@ -238,22 +239,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 16,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.gray100,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.borderLight,
   },
   statItem: {
     alignItems: 'center',
   },
   statLabel: {
     fontSize: 14,
-    color: '#757575',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   sectionTitle: {
     fontSize: 18,
@@ -261,30 +262,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
-    color: '#333',
+    color: colors.textPrimary,
   },
   articlesList: {
     padding: 16,
   },
   articleCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 12,
     marginBottom: 16,
     padding: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
+    ...shadows.small,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: colors.borderSubtle,
   },
   articleImage: {
     width: 80,
     height: 80,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.backgroundLight,
   },
   articleInfo: {
     flex: 1,
@@ -294,12 +291,12 @@ const styles = StyleSheet.create({
   articleName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   articleCategory: {
     fontSize: 14,
-    color: '#757575',
+    color: colors.textSecondary,
     marginBottom: 8,
     textTransform: 'capitalize',
   },
@@ -309,11 +306,11 @@ const styles = StyleSheet.create({
   },
   wearCountText: {
     fontSize: 14,
-    color: '#757575',
+    color: colors.textSecondary,
     marginLeft: 6,
   },
   wearButton: {
-    backgroundColor: '#42a5f5',
+    backgroundColor: colors.primary,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -321,10 +318,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 12,
     margin: 16,
-    elevation: 2,
+    ...shadows.small,
   },
   wearButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -339,7 +336,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#757575',
+    color: colors.textSecondary,
   },
   emptyContainer: {
     padding: 24,
@@ -347,7 +344,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#757575',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   errorContainer: {
@@ -358,12 +355,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#f44336',
+    color: colors.error,
     marginBottom: 16,
   },
   backButtonText: {
     fontSize: 16,
-    color: '#42a5f5',
+    color: colors.primary,
     fontWeight: '600',
   },
 });
