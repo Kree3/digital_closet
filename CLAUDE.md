@@ -21,9 +21,10 @@
   - Easy to swap out service implementations or UI frameworks.
 - **Component-Based Design System**
   - **/src/theme/** – Centralized theme system (colors, spacing, typography, shadows)
-  - **/src/components/common/** – Reusable UI components (AppHeader, Button, EmptyState)
+  - **/src/components/common/** – Comprehensive reusable UI components (AppHeader, Button, EmptyState, ArticleCard)
   - **Consistent Props**: All components follow similar prop patterns for easy learning
   - **Theme Integration**: All components use centralized theme system
+  - **Variant Architecture**: Components support multiple layouts/styles through variant props
 - **Modularity:** Each module has a single responsibility and clear interface.
 - **Testability:** All core logic is covered by Jest tests. New features require new tests.
 - **Scalability:** Architecture supports future features (filtering, sharing, etc.) without major rewrites.
@@ -63,11 +64,11 @@
     - `retouchedUrl`: URL to studio-style image
     - `metadata`: extracted attributes (color, type, etc.)
   - **Image Field Fallback & Persistence:**
-    - UI components (e.g., CategoryCarousel, CreateOutfitScreen) always render the first available image from `localImageUri`, `croppedImageUri`, `imageUri`, or `imageUrl`.
+    - **Unified Fallback Chain**: All UI components now use ArticleCard component which implements the standard fallback: `localImageUri` → `croppedImageUri` → `imageUri` → `imageUrl`
     - The `localImageUri` field (added May 2025) stores a local copy of remote images to solve the URL expiration issue with OpenAI DALL-E generated images.
     - Images are automatically downloaded and stored locally when articles are created or when the app starts up (via migration).
     - This ensures robust, multi-provider support (Clarifai, OpenAI, future pipelines) and prevents blank images even when remote URLs expire.
-    - If no image field is present, a placeholder is shown.
+    - ArticleCard component handles all placeholder scenarios with appropriate icons and messaging.
   - **Outfit Usage & Wear Tracking:**
     - Outfits can be marked as worn via the OutfitDetailScreen.
     - The `wearCount` field tracks how many times each article has been worn.
@@ -151,31 +152,49 @@
    - **Replaced**: Empty states in OutfitsScreen, HomeScreen, OutfitDetailScreen
    - **Impact**: ~100+ lines saved, consistent empty state UX
 
-**Total Refactoring Impact**: ~310+ lines eliminated, consistent design system, easier maintenance
+5. **✅ ArticleCard Component** (`src/components/common/ArticleCard.js`) **(Completed July 2025)**
+   - **Variants**: list, grid, carousel, verification, preview for all article display contexts
+   - **Features**: Unified image fallback chain, selection states, remove buttons, URL validation, touch handling
+   - **Replaced**: Article display patterns in OutfitDetailScreen, CreateOutfitScreen, VerificationScreen, CategoryCarousel
+   - **Impact**: ~200+ lines saved, consistent article rendering across app
 
-### Current Development Priorities
+**Total Refactoring Impact**: ~610+ lines eliminated, comprehensive component library, consistent design system
 
-1. **🚀 HIGH PRIORITY: ArticleCard Component** (In Progress)
-   - **Target**: Extract article display patterns from CategoryCarousel, CreateOutfitScreen, VerificationScreen, OutfitDetailScreen
-   - **Expected Impact**: ~200+ lines saved (biggest remaining win)
-   - **Features**: Multiple layout variants, selection states, action buttons, image fallbacks
+### Current Development Priorities (Updated July 14, 2025)
 
-2. **Code Quality Improvements**
+**Component Library Phase: COMPLETE ✅**
+All major component extractions have been successfully completed, establishing a solid foundation.
+
+**Next Development Focus:**
+
+1. **Code Quality & Architecture Improvements**
    - **Fix Large Functions**: Break down `galleryService.addArticles` (57 lines), `garmentVisionService.processGarmentImage` (56 lines)
    - **Standardize Error Handling**: Create consistent error patterns across services (~100+ lines saved)
    - **Expand Test Coverage**: Currently only 37% of services have tests
 
-3. **Future Enhancements**
-   - **Progressive Article Processing UI**: Show real-time processing feedback instead of silent waiting
+2. **Performance & User Experience**
+   - **Fix OutfitsScreen render loop**: Component mounts 5x during navigation (useEffect + useFocusEffect conflict)
+   - **Progressive Article Processing UI**: Show real-time feedback instead of silent waiting during image processing
+   - **Navigation Polish**: Fix outdated "Gallery" → "Wardrobe" screen references
+
+3. **Feature Development**
    - **Category-Based Navigation**: Enhanced filtering and transitions
    - **Usage Analytics Dashboard**: Visualizations and insights
    - **Search and Filter Functionality**: Robust search across wardrobe
 
-## 9. Future Improvements & Notes
+## 9. Component Library Architecture
 
-### **User Experience Improvements**
-- **Progressive article processing UI**: Currently when processing images with multiple clothing items, users see no feedback until ALL items are completely processed (detection + DALL-E generation + local storage). Should instead show items appearing one-by-one as they complete processing, with status indicators like "Analyzing image..." → "Found 3 items" → "Processing item 1/3..." → Item 1 appears → "Processing item 2/3..." → Item 2 appears, etc. This creates a sense of progress rather than a long silent wait.
+### **Established Component Patterns**
+All components follow consistent patterns established during the July 2025 refactoring:
 
-### **Navigation & Flow Issues**
-- **Fix outdated screen references**: Some components still reference old "Gallery" screen name instead of "Wardrobe" - needs systematic review
-- **OutfitsScreen render loop**: Component mounts repeatedly (5x) during navigation, possibly due to duplicate useEffect + useFocusEffect calling loadData()
+- **Variant-based Design**: Components support multiple variants through props (e.g., `variant="primary"`)
+- **Theme Integration**: All components use the centralized theme system for colors, spacing, typography
+- **Accessibility**: Built-in accessibility labels, keyboard navigation, and screen reader support
+- **Flexible Styling**: Custom styles can be passed via `style` prop while maintaining design consistency
+- **Loading States**: Components handle loading and error states gracefully
+
+### **Component Usage Guidelines**
+- **ArticleCard**: Use for all article display needs - supports list, grid, carousel, verification, preview variants
+- **Button**: Use for all interactive elements - supports primary, secondary, destructive, icon variants
+- **EmptyState**: Use for empty data states - supports fullscreen, inline, card variants with loading/error states
+- **AppHeader**: Use for all screen headers - supports main, navigation, simple variants
