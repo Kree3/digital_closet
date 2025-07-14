@@ -42,10 +42,34 @@ export default function Button({
     textStyle
   ];
 
-  const iconSize = size === 'small' ? 16 : size === 'large' ? 24 : 20;
-  const iconColor = variant === 'primary' || variant === 'destructive' 
-    ? colors.white 
-    : colors.primary;
+  // Determine icon size based on variant and specific icons
+  const getIconSize = () => {
+    if (variant === 'icon') {
+      if (icon === 'close-circle') return 28;
+      if (icon === 'trash-outline') return 18;
+      return 24;
+    }
+    return size === 'small' ? 16 : size === 'large' ? 24 : 20;
+  };
+  
+  const iconSize = getIconSize();
+  
+  // Determine icon color based on variant and context
+  const getIconColor = () => {
+    if (variant === 'primary' || variant === 'destructive') {
+      return colors.white;
+    }
+    if (variant === 'icon') {
+      // For icon buttons, use the appropriate color based on the icon
+      if (icon === 'close-circle' || icon === 'trash-outline') {
+        return colors.error;
+      }
+      return colors.primary;
+    }
+    return colors.primary;
+  };
+  
+  const iconColor = getIconColor();
 
   const renderContent = () => {
     if (loading) {
@@ -142,11 +166,11 @@ const styles = StyleSheet.create({
 
   iconButton: {
     backgroundColor: colors.white,
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    minWidth: 'auto',
+    minHeight: 'auto',
     ...shadows.small,
   },
 
