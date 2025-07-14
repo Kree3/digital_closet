@@ -27,6 +27,7 @@ import { getOutfits, removeOutfit } from '../services/outfitService';
 import { getAllArticles } from '../services/galleryService';
 import AppHeader from '../components/common/AppHeader';
 import Button from '../components/common/Button';
+import EmptyState from '../components/common/EmptyState';
 import { colors, shadows } from '../theme';
 
 export default function OutfitsScreen() {
@@ -139,28 +140,18 @@ export default function OutfitsScreen() {
   const renderEmptyState = () => {
     console.log('[OutfitsScreen] Rendering empty state, loading:', loading);
     
-    if (loading) {
-      return (
-        <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.emptyText}>Loading outfits...</Text>
-        </View>
-      );
-    }
-    
     return (
-      <View style={styles.emptyContainer}>
-        <Ionicons name="shirt-outline" size={64} color={colors.textDisabled} />
-        <Text style={styles.emptyTitle}>No Outfits Yet</Text>
-        <Text style={styles.emptyText}>
-          Create your first outfit by selecting items from your closet.
-        </Text>
-        <Button
-          title="Create Outfit"
-          onPress={navigateToCreateOutfit}
-          variant="primary"
-        />
-      </View>
+      <EmptyState
+        loading={loading}
+        loadingText="Loading outfits..."
+        icon="shirt-outline"
+        iconSize={64}
+        title="No Outfits Yet"
+        message="Create your first outfit by selecting items from your closet."
+        actionText="Create Outfit"
+        onActionPress={navigateToCreateOutfit}
+        variant="fullscreen"
+      />
     );
   };
   
@@ -316,24 +307,5 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     zIndex: 2,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 8,
-    color: colors.gray800,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
   },
 });

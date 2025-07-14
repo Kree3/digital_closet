@@ -14,6 +14,7 @@ import { View, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows } from '../theme';
 import AppHeader from '../components/common/AppHeader';
+import EmptyState from '../components/common/EmptyState';
 
 export default function HomeScreen({ navigation }) {
   // We'll keep the media functions for reference, but they'll be called from the FAB now
@@ -47,10 +48,12 @@ export default function HomeScreen({ navigation }) {
       
       <View style={styles.recentContainer}>
         <Text style={styles.sectionTitle}>Recent Activity</Text>
-        <View style={styles.emptyState}>
-          <Ionicons name="time-outline" size={48} color={colors.textDisabled} />
-          <Text style={styles.emptyStateText}>Your recent activity will appear here</Text>
-        </View>
+        <EmptyState
+          icon="time-outline"
+          iconSize={48}
+          message="Your recent activity will appear here"
+          variant="card"
+        />
       </View>
       
       <View style={styles.tipsContainer}>
@@ -103,19 +106,6 @@ const styles = StyleSheet.create({
   },
   recentContainer: {
     marginTop: 30,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.backgroundLight,
-    borderRadius: 12,
-    padding: 30,
-    marginVertical: 10,
-  },
-  emptyStateText: {
-    color: colors.textLight,
-    marginTop: 12,
-    textAlign: 'center',
   },
   tipsContainer: {
     marginTop: 30,

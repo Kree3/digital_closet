@@ -25,6 +25,7 @@ import { getAllArticles } from '../services/galleryService';
 import { colors, shadows } from '../theme';
 import AppHeader from '../components/common/AppHeader';
 import Button from '../components/common/Button';
+import EmptyState from '../components/common/EmptyState';
 
 export default function OutfitDetailScreen() {
   const navigation = useNavigation();
@@ -129,15 +130,14 @@ export default function OutfitDetailScreen() {
   if (!outfit) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Outfit not found</Text>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
+        <EmptyState
+          error={true}
+          title="Outfit not found"
+          actionText="Go Back"
+          onActionPress={() => navigation.goBack()}
+          actionVariant="secondary"
+          variant="fullscreen"
+        />
       </SafeAreaView>
     );
   }
@@ -167,10 +167,11 @@ export default function OutfitDetailScreen() {
       </View>
       
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Loading articles...</Text>
-        </View>
+        <EmptyState
+          loading={true}
+          loadingText="Loading articles..."
+          variant="fullscreen"
+        />
       ) : (
         <>
           <Text style={styles.sectionTitle}>Articles in this Outfit</Text>
@@ -180,9 +181,10 @@ export default function OutfitDetailScreen() {
             renderItem={renderArticle}
             contentContainerStyle={styles.articlesList}
             ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No articles found for this outfit.</Text>
-              </View>
+              <EmptyState
+                message="No articles found for this outfit."
+                variant="inline"
+              />
             }
           />
           
@@ -288,35 +290,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  emptyContainer: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  errorText: {
-    fontSize: 18,
-    color: colors.error,
-    marginBottom: 16,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: colors.primary,
-    fontWeight: '600',
   },
 });
