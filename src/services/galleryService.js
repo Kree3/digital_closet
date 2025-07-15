@@ -6,6 +6,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GALLERY_ARTICLES_KEY } from './constants';
 import { migrateAllArticleImages, migrateArticleImage } from './imageStorageService';
+import { logError, logWarning, logInfo } from './errorHandlingService';
 
 /**
  * Get all articles from the closet/gallery.
@@ -21,7 +22,7 @@ export async function getAllArticles(options = { migrateImages: false }) {
     
     // Optionally migrate images for articles with only imageUrl
     if (options.migrateImages && articles.length > 0) {
-      console.log('[galleryService] Migrating images for existing articles');
+      logInfo('[galleryService]', 'Migrating images for existing articles');
       const migratedArticles = await migrateAllArticleImages(articles);
       
       // Save the migrated articles back to storage if any were updated
@@ -31,7 +32,7 @@ export async function getAllArticles(options = { migrateImages: false }) {
       
       if (needsSaving) {
         await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(migratedArticles));
-        console.log('[galleryService] Saved migrated articles');
+        logInfo('[galleryService]', 'Saved migrated articles');
       }
       
       return migratedArticles;
@@ -39,9 +40,81 @@ export async function getAllArticles(options = { migrateImages: false }) {
     
     return articles;
   } catch (e) {
-    console.error('[galleryService] getAllArticles error:', e);
+    logError('[galleryService]', 'getAllArticles error', e);
     return [];
   }
+}
+
+/**
+ * Filter out duplicate articles based on their ID
+ * @param {Array} newArticles - New articles to filter
+ * @param {Array} existingArticles - Existing articles to check against
+ * @returns {Array} Filtered articles without duplicates
+ */
+function filterDuplicateArticles(newArticles, existingArticles) {
+  const existingIds = new Set(existingArticles.map(a => a.id));
+  return newArticles.filter(a => !existingIds.has(a.id));
+}
+
+/**
+ * Ensure all articles have wearCount initialized to 0 if not present
+ * @param {Array} articles - Articles to initialize
+ * @returns {Array} Articles with wearCount initialized
+ */
+function initializeWearCount(articles) {
+  return articles.map(article => ({
+    ...article,
+    wearCount: article.wearCount || 0
+  }));
+}
+
+/**
+ * Validate that articles have at least one required image field
+ * @param {Array} articles - Articles to validate
+ * @returns {Array} Articles that have valid image fields
+ */
+function validateArticleImageFields(articles) {
+  return articles.filter(article => {
+    const hasImageField = article.croppedImageUri || article.imageUri || article.imageUrl || article.localImageUri;
+    if (!hasImageField) {
+      logWarning('[galleryService]', `Skipping article with ID ${article.id} due to missing image fields`);
+    }
+    return hasImageField;
+  });
+}
+
+/**
+ * Handle image migration for articles with remote URLs
+ * @param {Array} articles - Articles to potentially migrate
+ * @returns {Promise<Array>} Articles with migrated images
+ */
+async function migrateArticleImages(articles) {
+  if (articles.length === 0) {
+    return articles;
+  }
+
+  logInfo('[galleryService]', `Migrating images for ${articles.length} new articles`);
+  const articlesToMigrate = articles.filter(article => 
+    article.imageUrl && !article.localImageUri
+  );
+  
+  if (articlesToMigrate.length === 0) {
+    return articles;
+  }
+
+  logInfo('[galleryService]', `Found ${articlesToMigrate.length} articles needing image migration`);
+  const migratedArticles = [];
+  
+  for (const article of articles) {
+    if (article.imageUrl && !article.localImageUri) {
+      const migratedArticle = await migrateArticleImage(article);
+      migratedArticles.push(migratedArticle);
+    } else {
+      migratedArticles.push(article);
+    }
+  }
+  
+  return migratedArticles;
 }
 
 /**
@@ -55,57 +128,28 @@ export async function getAllArticles(options = { migrateImages: false }) {
 export async function addArticles(newArticles, options = { validateImageFields: true, migrateImages: true }) {
   try {
     const existing = await getAllArticles();
-    const existingIds = new Set(existing.map(a => a.id));
     
     // Filter out articles with duplicate IDs
-    let filteredNew = newArticles.filter(a => !existingIds.has(a.id));
+    let filteredNew = filterDuplicateArticles(newArticles, existing);
     
     // Ensure all new articles have wearCount initialized to 0
-    filteredNew = filteredNew.map(article => ({
-      ...article,
-      wearCount: article.wearCount || 0
-    }));
+    filteredNew = initializeWearCount(filteredNew);
     
     // Validate image fields if option is enabled
     if (options.validateImageFields) {
-      filteredNew = filteredNew.filter(article => {
-        const hasImageField = article.croppedImageUri || article.imageUri || article.imageUrl || article.localImageUri;
-        if (!hasImageField) {
-          console.warn(`[galleryService] Skipping article with ID ${article.id} due to missing image fields`);
-        }
-        return hasImageField;
-      });
+      filteredNew = validateArticleImageFields(filteredNew);
     }
     
     // Migrate images for articles with only remote URLs
-    if (options.migrateImages && filteredNew.length > 0) {
-      console.log(`[galleryService] Migrating images for ${filteredNew.length} new articles`);
-      const articlesToMigrate = filteredNew.filter(article => 
-        article.imageUrl && !article.localImageUri
-      );
-      
-      if (articlesToMigrate.length > 0) {
-        console.log(`[galleryService] Found ${articlesToMigrate.length} articles needing image migration`);
-        const migratedArticles = [];
-        
-        for (const article of filteredNew) {
-          if (article.imageUrl && !article.localImageUri) {
-            const migratedArticle = await migrateArticleImage(article);
-            migratedArticles.push(migratedArticle);
-          } else {
-            migratedArticles.push(article);
-          }
-        }
-        
-        filteredNew = migratedArticles;
-      }
+    if (options.migrateImages) {
+      filteredNew = await migrateArticleImages(filteredNew);
     }
     
     const combined = [...existing, ...filteredNew];
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
     return combined;
   } catch (e) {
-    console.error('[galleryService] addArticles error:', e);
+    logError('[galleryService]', 'addArticles error', e);
     return [];
   }
 }
@@ -122,7 +166,7 @@ export async function deleteArticlesById(ids) {
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(filtered));
     return filtered;
   } catch (e) {
-    console.error('[galleryService] deleteArticlesById error:', e);
+    logError('[galleryService]', 'deleteArticlesById error', e);
     throw e;
   }
 }
@@ -135,11 +179,11 @@ export async function deleteArticlesById(ids) {
 export async function incrementWearCount(articleIds) {
   try {
     if (!articleIds || !articleIds.length) {
-      console.warn('[galleryService] No article IDs provided to incrementWearCount');
+      logWarning('[galleryService]', 'No article IDs provided to incrementWearCount');
       return await getAllArticles();
     }
     
-    console.log(`[galleryService] Incrementing wearCount for ${articleIds.length} articles`);
+    logInfo('[galleryService]', `Incrementing wearCount for ${articleIds.length} articles`);
     const articles = await getAllArticles();
     const idSet = new Set(articleIds);
     
@@ -159,7 +203,7 @@ export async function incrementWearCount(articleIds) {
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(updated));
     return updated;
   } catch (e) {
-    console.error('[galleryService] incrementWearCount error:', e);
+    logError('[galleryService]', 'incrementWearCount error', e);
     throw e;
   }
 }
@@ -170,13 +214,13 @@ export async function incrementWearCount(articleIds) {
  */
 export async function migrateArticlesWearCount() {
   try {
-    console.log('[galleryService] Starting wearCount migration');
+    logInfo('[galleryService]', 'Starting wearCount migration');
     
     // Get all articles without triggering other migrations
     const articles = await getAllArticles({ migrateImages: false });
     
     if (!articles || articles.length === 0) {
-      console.log('[galleryService] No articles found to migrate wearCount');
+      logInfo('[galleryService]', 'No articles found to migrate wearCount');
       return { success: true, migratedCount: 0, totalCount: 0 };
     }
     
@@ -185,7 +229,7 @@ export async function migrateArticlesWearCount() {
       typeof article.wearCount !== 'number'
     );
     
-    console.log(`[galleryService] Found ${needsMigration.length} of ${articles.length} articles needing wearCount migration`);
+    logInfo('[galleryService]', `Found ${needsMigration.length} of ${articles.length} articles needing wearCount migration`);
     
     if (needsMigration.length === 0) {
       return { success: true, migratedCount: 0, totalCount: articles.length };
@@ -200,7 +244,7 @@ export async function migrateArticlesWearCount() {
     // Save the migrated articles back to storage
     await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(migratedArticles));
     
-    console.log(`[galleryService] Successfully migrated wearCount for ${needsMigration.length} articles`);
+    logInfo('[galleryService]', `Successfully migrated wearCount for ${needsMigration.length} articles`);
     
     return { 
       success: true, 
@@ -208,7 +252,7 @@ export async function migrateArticlesWearCount() {
       totalCount: articles.length 
     };
   } catch (error) {
-    console.error('[galleryService] Error during wearCount migration:', error);
+    logError('[galleryService]', 'Error during wearCount migration', error);
     return { 
       success: false, 
       error: error.message || String(error),
@@ -226,7 +270,7 @@ export async function clearAllArticles() {
   try {
     await AsyncStorage.removeItem(GALLERY_ARTICLES_KEY);
   } catch (e) {
-    console.error('[galleryService] clearAllArticles error:', e);
+    logError('[galleryService]', 'clearAllArticles error', e);
     throw e;
   }
 }

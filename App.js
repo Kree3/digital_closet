@@ -11,10 +11,14 @@
 // Designed for scalability and clear navigation.
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 import AppNavigator from './src/navigation/AppNavigator';
 import { runMigrations } from './src/services/migrationService';
 import { initializeImageStorage } from './src/services/imageStorageService';
 import Constants from 'expo-constants';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 
 // Loading screen component shown during migrations
@@ -62,6 +66,13 @@ export default function App() {
         setLoadingStatus('Error initializing app. Please restart.');
         // We still set isReady to true to avoid getting stuck on loading screen
         setTimeout(() => setIsReady(true), 2000);
+      } finally {
+        // Hide the splash screen after initialization completes (success or error)
+        try {
+          await SplashScreen.hideAsync();
+        } catch (error) {
+          console.warn('[App] Error hiding splash screen:', error);
+        }
       }
     }
 

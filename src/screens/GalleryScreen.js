@@ -34,19 +34,29 @@ export default function GalleryScreen({ navigation, route }) {
     }
   };
 
-  // Clear selection if requested (after canceling outfit creation)
+  // Handle route parameters for selection management
   useFocusEffect(
     React.useCallback(() => {
       if (route.params?.resetSelection) {
         setSelectedIds([]);
-        // Optionally, clear the param so it doesn't trigger again
+        setIsSelectionMode(false);
+        // Clear the param so it doesn't trigger again
         navigation.setParams({ resetSelection: undefined });
       }
-    }, [route.params?.resetSelection])
+      
+      // Enter selection mode if requested (from OutfitsScreen "Create Outfit")
+      if (route.params?.selectMode) {
+        // Show selection UI by setting selection mode to true
+        setIsSelectionMode(true);
+        // Clear the param so it doesn't trigger again
+        navigation.setParams({ selectMode: undefined });
+      }
+    }, [route.params?.resetSelection, route.params?.selectMode])
   );
 
   const [articles, setArticles] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]); // Track selected articles
+  const [isSelectionMode, setIsSelectionMode] = useState(false); // Track if in selection mode
 
 
   // Load articles from galleryService on mount
@@ -84,6 +94,7 @@ export default function GalleryScreen({ navigation, route }) {
               const updated = await deleteArticlesById(selectedIds);
               setArticles(updated);
               setSelectedIds([]); // Clear selection
+              setIsSelectionMode(false); // Exit selection mode
             } catch (e) {
               Alert.alert('Error', 'Failed to delete selected articles.');
             }
@@ -97,18 +108,32 @@ export default function GalleryScreen({ navigation, route }) {
 
   // Toggle selection for an article
   const toggleSelect = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => {
+      const newSelection = prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id];
+      
+      // Auto-enable selection mode when first item is selected
+      if (newSelection.length > 0 && !isSelectionMode) {
+        setIsSelectionMode(true);
+      }
+      // Auto-disable selection mode when no items selected (unless enforced by route param)
+      else if (newSelection.length === 0 && isSelectionMode) {
+        setIsSelectionMode(false);
+      }
+      
+      return newSelection;
+    });
   };
 
   // Select all articles
   const selectAll = () => {
     setSelectedIds(articles.map(a => a.id));
+    setIsSelectionMode(true);
   };
+  
   // Deselect all articles
   const deselectAll = () => {
     setSelectedIds([]);
+    setIsSelectionMode(false);
   };
 
 
@@ -142,14 +167,14 @@ export default function GalleryScreen({ navigation, route }) {
               category={cat}
               articles={articlesByCategory[cat]}
               onItemPress={handleArticlePress}
-              selectionMode={selectedIds.length > 0}
+              selectionMode={isSelectionMode || selectedIds.length > 0}
               selectedIds={selectedIds}
             />
           ) : null
         )}
       </ScrollView>
       {/* Floating bottom action bar for selection actions */}
-      {selectedIds.length > 0 && (
+      {(isSelectionMode || selectedIds.length > 0) && (
         <View style={styles.fabBar}>
           {/* Left: Deselect All + # selected */}
           <TouchableOpacity
@@ -174,6 +199,17 @@ export default function GalleryScreen({ navigation, route }) {
             style={styles.createFitButton}
             onPress={() => {
               const selectedArticles = articles.filter(a => selectedIds.includes(a.id));
+              
+              // Prevent navigation if no articles are selected
+              if (selectedArticles.length === 0) {
+                Alert.alert(
+                  'No Articles Selected',
+                  'Please select at least one article to create an outfit.',
+                  [{ text: 'OK' }]
+                );
+                return;
+              }
+              
               navigation.navigate('CreateOutfit', { selectedArticles });
             }}
             accessibilityLabel="Create Fit from selected articles"

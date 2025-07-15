@@ -7,6 +7,8 @@
 // NOTE: You must provide your OpenAI API key via environment/config.
 
 import { downloadAndSaveImage } from './imageStorageService';
+import { describeGarmentImage } from './garmentDescriptionService';
+import { generateGarmentImage } from './garmentImageGenerationService';
 
 /**
  * Utility: Convert a base64 data URI to a Blob (for multipart/form-data)
@@ -22,6 +24,75 @@ export function dataUriToBlob(dataUri) {
     ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ab], { type: mimeString });
+}
+
+/**
+ * Validates the processing options
+ * @param {object} options - Processing options
+ * @returns {string} openaiApiKey - Validated API key
+ * @throws {Error} If API key is missing
+ */
+function validateProcessingOptions(options) {
+  const { openaiApiKey } = options;
+  if (!openaiApiKey) throw new Error('Missing OpenAI API key');
+  return openaiApiKey;
+}
+
+/**
+ * Gets clothing items from image using GPT-4o Vision
+ * @param {string} base64Image - JPEG base64 string from ImagePicker
+ * @param {string} openaiApiKey - OpenAI API key
+ * @returns {Promise<Array>} Array of clothing items
+ */
+async function getClothingItemsFromImage(base64Image, openaiApiKey) {
+  try {
+    const clothingItems = await describeGarmentImage(base64Image, { openaiApiKey });
+    console.log('[garmentVisionService] describeGarmentImage result:', clothingItems);
+    
+    if (!Array.isArray(clothingItems) || clothingItems.length === 0) {
+      console.warn('[garmentVisionService] No clothing items detected in the image.');
+      return { error: true, message: 'No clothing items detected in the image.', stage: 'describeGarmentImage' };
+    }
+    
+    return clothingItems;
+  } catch (err) {
+    console.error('[garmentVisionService] Error in describeGarmentImage:', err);
+    return { error: true, message: err.message || String(err), stage: 'describeGarmentImage' };
+  }
+}
+
+/**
+ * Processes a single clothing item: generates image and saves locally
+ * @param {object} item - Clothing item to process
+ * @param {string} openaiApiKey - OpenAI API key
+ * @returns {Promise<object>} Processed article with image URLs
+ */
+async function processClothingItem(item, openaiApiKey) {
+  let article = { ...item };
+  
+  try {
+    console.log(`[garmentVisionService] Generating image for item ${article.id}:`, article.description);
+    const generatedImageUrl = await generateGarmentImage(article.description, { openaiApiKey });
+    article.imageUrl = generatedImageUrl;
+    console.log(`[garmentVisionService] DALL-E image URL for item ${article.id}:`, generatedImageUrl);
+    
+    // Download and save the image locally for persistence
+    try {
+      const localImageUri = await downloadAndSaveImage(generatedImageUrl);
+      article.localImageUri = localImageUri;
+      console.log(`[garmentVisionService] Saved local image for item ${article.id}:`, localImageUri);
+    } catch (downloadError) {
+      console.error(`[garmentVisionService] Error saving local image for item ${article.id}:`, downloadError);
+      // We still have the imageUrl, so we can continue even if local storage fails
+    }
+  } catch (e) {
+    // If DALL-E fails, set imageUrl to null and add error property
+    article.imageUrl = null;
+    article.error = e.message || 'Image generation failed';
+    console.error(`[garmentVisionService] Error generating image for item ${article.id}:`, e);
+  }
+  
+  return article;
 }
 
 /**
@@ -41,53 +112,26 @@ export function dataUriToBlob(dataUri) {
 // Returns: { description, generatedImageUrl }
 export async function processGarmentImage(base64Image, options) {
   console.log('[garmentVisionService] processGarmentImage called with base64Image length:', base64Image?.length, 'options:', options);
+  
   try {
-    const { openaiApiKey } = options;
-    if (!openaiApiKey) throw new Error('Missing OpenAI API key');
+    // Step 1: Validate processing options
+    const openaiApiKey = validateProcessingOptions(options);
 
-    // Step 1: Get garment items from image (GPT-4o Vision)
-    const { describeGarmentImage } = await import('./garmentDescriptionService.js');
-    let clothingItems;
-    try {
-      clothingItems = await describeGarmentImage(base64Image, { openaiApiKey });
-      console.log('[garmentVisionService] describeGarmentImage result:', clothingItems);
-    } catch (err) {
-      console.error('[garmentVisionService] Error in describeGarmentImage:', err);
-      return { error: true, message: err.message || String(err), stage: 'describeGarmentImage' };
-    }
-    if (!Array.isArray(clothingItems) || clothingItems.length === 0) {
-      console.warn('[garmentVisionService] No clothing items detected in the image.');
-      return { error: true, message: 'No clothing items detected in the image.', stage: 'describeGarmentImage' };
+    // Step 2: Get garment items from image (GPT-4o Vision)
+    const clothingItems = await getClothingItemsFromImage(base64Image, openaiApiKey);
+    
+    // Check if error occurred during garment detection
+    if (clothingItems.error) {
+      return clothingItems;
     }
 
-    // Step 2: Generate product image for each clothing item (DALL-E)
-    const { generateGarmentImage } = await import('./garmentImageGenerationService.js');
+    // Step 3: Generate product image for each clothing item (DALL-E)
     const results = [];
     for (const item of clothingItems) {
-      let article = { ...item };
-      try {
-        console.log(`[garmentVisionService] Generating image for item ${article.id}:`, article.description);
-        const generatedImageUrl = await generateGarmentImage(article.description, { openaiApiKey });
-        article.imageUrl = generatedImageUrl;
-        console.log(`[garmentVisionService] DALL-E image URL for item ${article.id}:`, generatedImageUrl);
-        
-        // Download and save the image locally for persistence
-        try {
-          const localImageUri = await downloadAndSaveImage(generatedImageUrl);
-          article.localImageUri = localImageUri;
-          console.log(`[garmentVisionService] Saved local image for item ${article.id}:`, localImageUri);
-        } catch (downloadError) {
-          console.error(`[garmentVisionService] Error saving local image for item ${article.id}:`, downloadError);
-          // We still have the imageUrl, so we can continue even if local storage fails
-        }
-      } catch (e) {
-        // If DALL-E fails, set imageUrl to null and add error property
-        article.imageUrl = null;
-        article.error = e.message || 'Image generation failed';
-        console.error(`[garmentVisionService] Error generating image for item ${article.id}:`, e);
-      }
-      results.push(article);
+      const processedArticle = await processClothingItem(item, openaiApiKey);
+      results.push(processedArticle);
     }
+    
     console.log('[garmentVisionService] Final pipeline result:', results);
     return results;
   } catch (err) {
