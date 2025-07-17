@@ -10,6 +10,7 @@
 //
 // Designed for scalability and clear navigation.
 import React, { useEffect, useState } from 'react';
+import { PostHogProvider } from 'posthog-react-native';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -20,9 +21,7 @@ import Constants from 'expo-constants';
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
-
 // Loading screen component shown during migrations
-
 // Loading screen component shown during migrations
 function LoadingScreen({ status }) {
   return (
@@ -79,7 +78,6 @@ export default function App() {
     initialize();
   }, []);
 
-  // Show loading screen until migrations complete
   if (!isReady) {
     return <LoadingScreen status={loadingStatus} />;
   }

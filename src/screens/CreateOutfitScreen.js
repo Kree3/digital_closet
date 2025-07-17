@@ -15,6 +15,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, Alert, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { usePostHog } from 'posthog-react-native';
 import { saveOutfit as saveOutfitService } from '../services/outfitService';
 import { colors, shadows } from '../theme';
 import Button from '../components/common/Button';
@@ -25,6 +26,7 @@ export default function CreateOutfitScreen() {
   const fitNameInputRef = useRef(null);
   const navigation = useNavigation();
   const route = useRoute();
+  const posthog = usePostHog();
   const initialArticles = route.params?.selectedArticles || [];
   const [articles, setArticles] = useState(initialArticles);
   const [name, setName] = useState('');
@@ -40,16 +42,20 @@ export default function CreateOutfitScreen() {
     setSaving(true);
     try {
       await saveOutfitService({ name, articles });
+      
+      // Track outfit creation event with PostHog
+      posthog.capture('outfit_created', {
+        outfit_name: name,
+        article_count: articles.length,
+        article_types: articles.map(article => article.category || 'unknown'),
+        created_at: new Date().toISOString()
+      });
+      
       Alert.alert('Outfit saved!');
-      // Replace the current screen in the navigation stack with Outfits
-      // This prevents going back to the outfit creation screen
-      navigation.reset({
-        index: 0,
-        routes: [
-          { name: 'Home' },
-          { name: 'Wardrobe', params: { resetSelection: true } },
-          { name: 'Outfits' }
-        ],
+      // Navigate to the Outfits tab after creating an outfit
+      navigation.navigate('Main', { 
+        screen: 'Outfits',
+        params: { screen: 'OutfitsScreen' }
       });
     } catch (e) {
       Alert.alert('Error', e.message || 'Failed to save outfit.');

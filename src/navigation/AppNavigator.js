@@ -17,6 +17,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
+import { PostHogProvider } from 'posthog-react-native';
+import { POSTHOG_API_KEY } from '@env';
 import { colors, shadows } from '../theme';
 
 // Enable screens for better performance
@@ -312,10 +314,20 @@ export default function AppNavigator() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Main" component={TabNavigator} />
-          <Stack.Screen name="Verify" component={VerificationScreen} />
-        </Stack.Navigator>
+        <PostHogProvider
+          apiKey={POSTHOG_API_KEY}
+          options={{
+            host: 'https://us.i.posthog.com',
+            enableSessionReplay: true,
+          }}
+          autocapture
+        >
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="Verify" component={VerificationScreen} />
+            <Stack.Screen name="CreateOutfit" component={CreateOutfitScreen} />
+          </Stack.Navigator>
+        </PostHogProvider>
       </NavigationContainer>
     </SafeAreaProvider>
   );

@@ -96,10 +96,67 @@ async function processClothingItem(item, openaiApiKey) {
 }
 
 /**
+ * Process multiple clothing items through the image generation pipeline
+ * @param {Array} clothingItems - Array of clothing items to process
+ * @param {string} openaiApiKey - OpenAI API key
+ * @param {Object} options - Processing options
+ * @returns {Promise<Array>} Array of processed articles
+ */
+async function processClothingItemsBatch(clothingItems, openaiApiKey, options = {}) {
+  const { parallel = false } = options;
+  
+  if (parallel) {
+    // Process all items in parallel for better performance
+    const promises = clothingItems.map(item => processClothingItem(item, openaiApiKey));
+    return await Promise.all(promises);
+  } else {
+    // Process items sequentially (original behavior)
+    const results = [];
+    for (const item of clothingItems) {
+      const processedArticle = await processClothingItem(item, openaiApiKey);
+      results.push(processedArticle);
+    }
+    return results;
+  }
+}
+
+/**
+ * Finalize and format pipeline results with consistent logging
+ * @param {Array} results - Processed clothing items
+ * @returns {Array} Formatted results
+ */
+function finalizePipelineResults(results) {
+  console.log('[garmentVisionService] Final pipeline result:', results);
+  return results;
+}
+
+/**
+ * Run the complete GarmentVision pipeline orchestration
+ * @param {string} base64Image - JPEG base64 string from ImagePicker
+ * @param {string} openaiApiKey - Validated OpenAI API key
+ * @param {Object} options - Processing options
+ * @returns {Promise<Array|Object>} Processed articles or error object
+ */
+async function runGarmentVisionPipeline(base64Image, openaiApiKey, options = {}) {
+  // Step 1: Get garment items from image (GPT-4o Vision)
+  const clothingItems = await getClothingItemsFromImage(base64Image, openaiApiKey);
+  
+  // Check if error occurred during garment detection
+  if (clothingItems.error) {
+    return clothingItems;
+  }
+
+  // Step 2: Process all clothing items through image generation
+  const results = await processClothingItemsBatch(clothingItems, openaiApiKey, options);
+  
+  return finalizePipelineResults(results);
+}
+
+/**
  * Main GarmentVision processing pipeline
  *
  * @param {string} base64Image - JPEG base64 string from ImagePicker
- * @param {object} options - { openaiApiKey: string, ... }
+ * @param {object} options - { openaiApiKey: string, parallel?: boolean, ... }
  * @returns {Promise<{
  *   boundingBox: {x: number, y: number, w: number, h: number},
  *   maskPngB64: string, // base64 PNG
@@ -114,26 +171,11 @@ export async function processGarmentImage(base64Image, options) {
   console.log('[garmentVisionService] processGarmentImage called with base64Image length:', base64Image?.length, 'options:', options);
   
   try {
-    // Step 1: Validate processing options
+    // Validate processing options
     const openaiApiKey = validateProcessingOptions(options);
-
-    // Step 2: Get garment items from image (GPT-4o Vision)
-    const clothingItems = await getClothingItemsFromImage(base64Image, openaiApiKey);
     
-    // Check if error occurred during garment detection
-    if (clothingItems.error) {
-      return clothingItems;
-    }
-
-    // Step 3: Generate product image for each clothing item (DALL-E)
-    const results = [];
-    for (const item of clothingItems) {
-      const processedArticle = await processClothingItem(item, openaiApiKey);
-      results.push(processedArticle);
-    }
-    
-    console.log('[garmentVisionService] Final pipeline result:', results);
-    return results;
+    // Run the complete pipeline
+    return await runGarmentVisionPipeline(base64Image, openaiApiKey, options);
   } catch (err) {
     console.error('[garmentVisionService] Pipeline error:', err);
     return { error: true, message: err.message || String(err), stage: 'pipeline' };

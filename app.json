@@ -12,6 +12,9 @@
     },
     "assetBundlePatterns": [
       "**/*"
+    ],
+    "plugins": [
+      "expo-localization"
     ]
   }
 }

@@ -118,6 +118,57 @@ async function migrateArticleImages(articles) {
 }
 
 /**
+ * Normalize and apply default values to addArticles options
+ * @param {Object} options - Raw options object
+ * @returns {Object} Normalized options with defaults
+ */
+function normalizeAddArticlesOptions(options = {}) {
+  return {
+    validateImageFields: options.validateImageFields !== false, // default true
+    migrateImages: options.migrateImages !== false // default true
+  };
+}
+
+/**
+ * Process new articles through the validation and migration pipeline
+ * @param {Array} newArticles - Raw new articles to process
+ * @param {Array} existingArticles - Existing articles for duplicate filtering
+ * @param {Object} options - Processing options
+ * @returns {Promise<Array>} Processed articles ready for storage
+ */
+async function processNewArticles(newArticles, existingArticles, options) {
+  // Filter out articles with duplicate IDs
+  let filteredNew = filterDuplicateArticles(newArticles, existingArticles);
+  
+  // Ensure all new articles have wearCount initialized to 0
+  filteredNew = initializeWearCount(filteredNew);
+  
+  // Validate image fields if option is enabled
+  if (options.validateImageFields) {
+    filteredNew = validateArticleImageFields(filteredNew);
+  }
+  
+  // Migrate images for articles with only remote URLs
+  if (options.migrateImages) {
+    filteredNew = await migrateArticleImages(filteredNew);
+  }
+  
+  return filteredNew;
+}
+
+/**
+ * Save articles to AsyncStorage
+ * @param {Array} existingArticles - Current articles in storage
+ * @param {Array} newArticles - New articles to add
+ * @returns {Promise<Array>} Combined array of all articles
+ */
+async function saveArticlesToStorage(existingArticles, newArticles) {
+  const combined = [...existingArticles, ...newArticles];
+  await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
+  return combined;
+}
+
+/**
  * Add new articles (array) to the closet, filtering by unique id and validating image fields.
  * @param {Array} newArticles
  * @param {Object} options
@@ -125,29 +176,12 @@ async function migrateArticleImages(articles) {
  * @param {boolean} [options.migrateImages=true] - If true, download and store remote images locally
  * @returns {Promise<Array>} Combined array of all articles
  */
-export async function addArticles(newArticles, options = { validateImageFields: true, migrateImages: true }) {
+export async function addArticles(newArticles, options) {
   try {
-    const existing = await getAllArticles();
-    
-    // Filter out articles with duplicate IDs
-    let filteredNew = filterDuplicateArticles(newArticles, existing);
-    
-    // Ensure all new articles have wearCount initialized to 0
-    filteredNew = initializeWearCount(filteredNew);
-    
-    // Validate image fields if option is enabled
-    if (options.validateImageFields) {
-      filteredNew = validateArticleImageFields(filteredNew);
-    }
-    
-    // Migrate images for articles with only remote URLs
-    if (options.migrateImages) {
-      filteredNew = await migrateArticleImages(filteredNew);
-    }
-    
-    const combined = [...existing, ...filteredNew];
-    await AsyncStorage.setItem(GALLERY_ARTICLES_KEY, JSON.stringify(combined));
-    return combined;
+    const normalizedOptions = normalizeAddArticlesOptions(options);
+    const existingArticles = await getAllArticles();
+    const processedArticles = await processNewArticles(newArticles, existingArticles, normalizedOptions);
+    return await saveArticlesToStorage(existingArticles, processedArticles);
   } catch (e) {
     logError('[galleryService]', 'addArticles error', e);
     return [];
